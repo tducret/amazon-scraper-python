@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import click
+import amazon as amz
+
+
+@click.command()
+@click.option(
+    '--keywords', '-k',
+    type=str,
+    help='your keywords to find some products (ex : "python+scraping")',
+    prompt='your keywords to find some products (ex : "python+scraping")',
+    default="",
+)
+@click.option(
+    '--url', '-u',
+    type=str,
+    help='an Amazon result page URL (ex : \
+    https://www.amazon.com/s/field-keywords=python%2Bscraping',
+    prompt='an Amazon result page URL (ex : \
+    https://www.amazon.com/s/field-keywords=python%2Bscraping',
+    default="",
+)
+@click.version_option(
+    version=amz.__version__,
+    message='%(prog)s, based on amazon module version %(version)s'
+)
+def main(keywords="", url=""):
+    """ Récupère la synthèse des comptes bancaires ING Direct """
+    products = amz.get_products(keywords, url)
+
+    print(products.csv())
+
+
+if __name__ == "__main__":
+    main()

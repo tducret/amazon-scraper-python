@@ -1,4 +1,4 @@
-# amazon-scraper
+# amazon-scraper-python
 
 # Description
 
@@ -12,7 +12,7 @@ This package allows you to search for products on [Amazon](https://www.amazon.co
 # Installation
 
 ```bash
-pip3 install -U amazon-scraper
+pip3 install -U amazon
 ```
 
 # Command line tool `amz`
@@ -37,11 +37,11 @@ More info about the command in the help :
 amz --help
 ```
 
-# Using the amazon-scraper Python package
+# Using the amazon Python package
 
 ```python
 # -*- coding: utf-8 -*-
-import amazon-scraper as amz
+import amazon as amz
 
 results = amz.search("Python programming")
 
