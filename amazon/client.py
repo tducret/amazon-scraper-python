@@ -106,7 +106,3 @@ def _css_select(soup, css_selector):
         else:
             retour = False
         return retour
-
-# TODO : Ajouter une contrainte de nombre max de résultats
-# TODO : Mettre en conf
-# TODO : Faire le package
