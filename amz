@@ -35,7 +35,7 @@ https://www.amazon.com/s/field-keywords=python%2Bscraping',
     message='%(prog)s, based on amazon module version %(version)s'
 )
 def main(keywords, url, csvseparator, maxproductnb):
-    """ Récupère la synthèse des comptes bancaires ING Direct """
+    """ Search for products on Amazon, and extract it as CSV """
     products = amazonscraper.search(
                                     keywords=keywords,
                                     search_url=url,
