@@ -6,7 +6,7 @@ from builtins import object
 from amazonscraper.client import Client
 import json
 
-__version__ = '0.0.4'  # Should be the same in setup.py
+__version__ = '0.0.5'  # Should be the same in setup.py
 
 
 class Products(object):
