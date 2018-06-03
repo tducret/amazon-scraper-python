@@ -9,14 +9,25 @@ from bs4 import BeautifulSoup
 
 _BASE_URL = "https://www.amazon.com/"
 _DEFAULT_BEAUTIFULSOUP_PARSER = "html.parser"
-PRODUCT_CSS_SELECTOR = "#resultItems > li"
-TITLE_CSS_SELECTOR = "a > div > div.sx-table-detail > h5 > span"
-RATING_CSS_SELECTOR = "a > div > div.sx-table-detail > \
-    div.a-icon-row.a-size-small > i > span"
-CUSTOMER_REVIEW_NB_CSS_SELECTOR = "a > div > \
-    div.sx-table-detail > div.a-icon-row.a-size-small > span"
-URL_CSS_SELECTOR = "a['href']"
-NEXT_PAGE_URL_CSS_SELECTOR = "ul.a-pagination > li.a-last > a['href']"
+CSS_SELECTORS_1 = {
+    "product": "#resultItems > li",
+    "title": "a > div > div.sx-table-detail > h5 > span",
+    "rating": "a > div > div.sx-table-detail > \
+               div.a-icon-row.a-size-small > i > span",
+    "review_nb": "a > div > div.sx-table-detail > \
+                  div.a-icon-row.a-size-small > span",
+    "url": "a['href']",
+    "next_page_url": "ul.a-pagination > li.a-last > a['href']",
+}
+# Sometimes, the result page is displayed with another layout
+CSS_SELECTORS_2 = {
+    "product": "#grid-atf-content > li > div.s-item-container",
+    "title": "a > div > h5.sx-title > span",
+    "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
+    "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
+    "url": "a['href']",
+    "next_page_url": "ul.a-pagination > li.a-last > a['href']",
+}
 
 
 class Client(object):
@@ -63,25 +74,36 @@ class Client(object):
         res = self._get(search_url)
         soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
+        css_selector_dict = CSS_SELECTORS_1
+
+        products = soup.select(css_selector_dict.get("product", ""))
+        if len(products) < 1:
+            # Test the other css selectors
+            css_selector_dict = CSS_SELECTORS_2
+            products = soup.select(css_selector_dict.get("product", ""))
+
         # For each product of the result page
-        for product in soup.select(PRODUCT_CSS_SELECTOR):
+        for product in products:
             if len(self.product_dict_list) >= max_product_nb:
                 # Check if the maximum number to search has been reached
                 break
             else:
                 product_dict = {}
-                title = _css_select(product, TITLE_CSS_SELECTOR)
+                title = _css_select(product,
+                                    css_selector_dict.get("title", ""))
                 product_dict['title'] = title
-                rating = _css_select(product, RATING_CSS_SELECTOR)
+                rating = _css_select(product,
+                                     css_selector_dict.get("rating", ""))
                 review_nb = _css_select(product,
-                                        CUSTOMER_REVIEW_NB_CSS_SELECTOR)
+                                        css_selector_dict.get("review_nb", ""))
                 if rating:
                     proper_rating = rating.split(" ")[0].strip()
                     product_dict['rating'] = proper_rating
                 if review_nb:
                     proper_review_nb = review_nb.split("(")[1].split(")")[0]
                     product_dict['review_nb'] = proper_review_nb
-                url_product_soup = product.select(URL_CSS_SELECTOR)
+                url_product_soup = product.select(
+                                   css_selector_dict.get("url", ""))
                 if url_product_soup:
                     url = urljoin(
                         self.base_url,
@@ -94,7 +116,8 @@ class Client(object):
         if len(self.product_dict_list) < max_product_nb:
             # Check if there is another page
             # only if we have not already reached the max number of products
-            url_next_page_soup = soup.select(NEXT_PAGE_URL_CSS_SELECTOR)
+            url_next_page_soup = soup.select(
+                                 css_selector_dict.get("next_page_url", ""))
             if url_next_page_soup:
                 url_next_page = urljoin(
                     self.base_url,
