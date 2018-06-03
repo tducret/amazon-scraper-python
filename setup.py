@@ -14,7 +14,7 @@ _DESCRIPTION = 'Package to search for products on Amazon and extract \
 some useful information (title, ratings, number of reviews)'
 _MOTS_CLES = ['api', 'amazon', 'python', 'amazonscraper', 'parsing',
               'python-wrapper', 'scraping', 'scraper', 'parser']
-_SCRIPTS = ['amz']
+_SCRIPTS = ['amazon2csv']
 # To delete here + 'scripts' dans setup()
 # if no command is used in the package
 

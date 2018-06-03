@@ -15,26 +15,36 @@ This package allows you to search for products on [Amazon](https://www.amazon.co
 pip3 install -U amazonscraper
 ```
 
-# Command line tool `amz`
+# Command line tool `amazon2csv`
 
-After the package installation, you can use the `amz` command in the terminal.
+After the package installation, you can use the `amazon2csv` command in the terminal.
+
+After passing a search request to the command (and an optional maximum number of products), it will return the results as csv :
 
 ```bash
-amz
+amazon2csv --keywords="Python programming" --maxproductnb=2
 ```
-
-After passing a search request to the command, it will return the results as csv :
 
 ```csv
 Product title,Rating,Number of customer reviews,Product URL
-"Learning Python, 5th Edition",4.0,293,https://www.amazon.com/Learning-Python-5th-Mark-Lutz/dp/1449355730
-"Fluent Python: Clear, Concise, and Effective Programming",4.6,87,https://www.amazon.com/Fluent-Python-Concise-Effective-Programming/dp/1491946008
+"Python Crash Course: A Hands-On, Project-Based Introduction to Programming",4.5,309,https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036
+"A Smarter Way to Learn Python: Learn it faster. Remember it longer.",4.8,144,https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B
 ```
+
+You can also pass a search url (if you added complex filters for example), and save it to a file :
+
+```bash
+amazon2csv --url="https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=python+scraping > output.csv"
+```
+
+You can then open it with your favorite spreadsheet editor (and play with the filters) :
+
+![snapshot amazon2csv](snapshot_amazon2csv.png)
 
 More info about the command in the help :
 
 ```bash
-amz --help
+amazon2csv --help
 ```
 
 # Using the amazonscraper Python package

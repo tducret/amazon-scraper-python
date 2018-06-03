@@ -32,7 +32,7 @@ https://www.amazon.com/s/field-keywords=python%2Bscraping',
 )
 @click.version_option(
     version=amazonscraper.__version__,
-    message='%(prog)s, based on amazon module version %(version)s'
+    message='%(prog)s, based on amazonscraper module version %(version)s'
 )
 def main(keywords, url, csvseparator, maxproductnb):
     """ Search for products on Amazon, and extract it as CSV """
