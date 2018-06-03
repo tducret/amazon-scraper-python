@@ -7,7 +7,7 @@ except ImportError:  # For pip <= 9
 
 # Based on http://peterdowns.com/posts/first-time-with-pypi.html
 
-__version__ = '0.0.1'  # Should match with __init.py__
+__version__ = '0.0.2'  # Should match with __init.py__
 _NOM_PACKAGE = 'amazonscraper'
 _URL_GITHUB = 'https://github.com/tducret/amazon-scraper-python'
 _DESCRIPTION = 'Package to search for products on Amazon and extract \

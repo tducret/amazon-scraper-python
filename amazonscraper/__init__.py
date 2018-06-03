@@ -3,19 +3,22 @@
 useful information (title, ratings, number of reviews).
 """
 from builtins import object
-from amazon.client import Client
+from amazonscraper.client import Client
 import json
 
-__version__ = '0.0.1'  # Should be the same in setup.py
+__version__ = '0.0.2'  # Should be the same in setup.py
 
 
 class Products(object):
     """Class of the products"""
     def __init__(self, product_dict_list=[]):
-        self.products = product_dict_list
+        self.products = []
+        for product_dict in product_dict_list:
+            self._add_product(product_dict)
 
     def _add_product(self, product_dict):
-        self.products.append(product_dict)
+        product = Product(product_dict)
+        self.products.append(product)
 
     def __repr__(self):
         return json.dumps(self.products, indent=1)
@@ -35,15 +38,30 @@ class Products(object):
                                     "Number of customer reviews",
                                     "Product URL"])
         for product in self:
-            rating = product.get("rating", "")
+            rating = product.rating
             if separator == ";":  # French convention
                 rating = rating.replace(".", ",")
             csv_string += ("\n"+separator.join([
-                                        product.get("title", ""),
+                                        # Add the doublequotes " for titles
+                                        '"'+product.title+'"',
                                         rating,
-                                        product.get("review_nb", ""),
-                                        product.get("url", "")]))
+                                        product.review_nb,
+                                        product.url]))
         return csv_string
+
+
+class Product(object):
+    """Class of a product"""
+    def __init__(self, product_dict={}):
+        self.product = product_dict
+
+    def __repr__(self):
+        return json.dumps(self.products, indent=1)
+
+    def __getattr__(self, attr):
+        """ Method to access a dictionnary key as an attribute
+        (ex : product.title) """
+        return self.product.get(attr, "")
 
 
 def get_products(keywords="", url=""):
