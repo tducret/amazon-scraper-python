@@ -46,7 +46,7 @@ import amazonscraper
 results = amazonscraper.search("Python programming")
 
 for result in results:
-    print("%s (%.2f out of 5 stars, %d customer reviews) :  %s" % (result.title, result.rating, result.review_nb, result.url))
+    print("%s (%s out of 5 stars, %d customer reviews) :  %s" % (result.title, result.rating, result.review_nb, result.url))
 
 print("Number of results : %d€" % (len(results)))
 
@@ -69,7 +69,3 @@ title               | Product title
 rating      	    | Rating of the products (number between 0 and 5, False if missing)
 review_nb	        | Number of customer reviews (False if missing)
 url 				| Product URL
-
-
-# TODO
-- Add a max number of results
