@@ -34,7 +34,7 @@ Product title,Rating,Number of customer reviews,Product URL
 You can also pass a search url (if you added complex filters for example), and save it to a file :
 
 ```bash
-amazon2csv --url="https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=python+scraping > output.csv"
+amazon2csv --url="https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=python+scraping" > output.csv
 ```
 
 You can then open it with your favorite spreadsheet editor (and play with the filters) :
@@ -47,7 +47,7 @@ More info about the command in the help :
 amazon2csv --help
 ```
 
-# Using the `amazonscraper` Python package
+# Using the `amazonscraper Python package
 
 ```python
 # -*- coding: utf-8 -*-
