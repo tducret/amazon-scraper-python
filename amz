@@ -15,7 +15,7 @@ import amazonscraper
     '--url', '-u',
     type=str,
     help='an Amazon result page URL (ex : \
-    https://www.amazon.com/s/field-keywords=python%2Bscraping',
+https://www.amazon.com/s/field-keywords=python%2Bscraping',
     default="",
 )
 @click.option(
@@ -24,13 +24,22 @@ import amazonscraper
     help='CSV separator (ex : ;)',
     default=",",
 )
+@click.option(
+    '--maxproductnb', '-m',
+    type=int,
+    help='Maximum number of products (ex : 100)',
+    default="100",
+)
 @click.version_option(
     version=amazonscraper.__version__,
     message='%(prog)s, based on amazon module version %(version)s'
 )
-def main(keywords, url, csvseparator):
+def main(keywords, url, csvseparator, maxproductnb):
     """ Récupère la synthèse des comptes bancaires ING Direct """
-    products = amazonscraper.get_products(keywords, url)
+    products = amazonscraper.search(
+                                    keywords=keywords,
+                                    search_url=url,
+                                    max_product_nb=maxproductnb)
 
     print(products.csv(separator=csvseparator))
 

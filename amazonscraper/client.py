@@ -56,7 +56,7 @@ class Client(object):
         search_url = urljoin(_BASE_URL, ("s/field-keywords=%s" % (keywords)))
         return search_url
 
-    def _get_products(self, keywords="", search_url=""):
+    def _get_products(self, keywords="", search_url="", max_product_nb=100):
         if search_url == "":
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
@@ -65,34 +65,42 @@ class Client(object):
 
         # For each product of the result page
         for product in soup.select(PRODUCT_CSS_SELECTOR):
-            product_dict = {}
-            title = _css_select(product, TITLE_CSS_SELECTOR)
-            product_dict['title'] = title
-            rating = _css_select(product, RATING_CSS_SELECTOR)
-            review_nb = _css_select(product, CUSTOMER_REVIEW_NB_CSS_SELECTOR)
-            if rating:
-                proper_rating = rating.split(" ")[0].strip()
-                product_dict['rating'] = proper_rating
-            if review_nb:
-                proper_review_nb = review_nb.split("(")[1].split(")")[0]
-                product_dict['review_nb'] = proper_review_nb
-            url_product_soup = product.select(URL_CSS_SELECTOR)
-            if url_product_soup:
-                url = urljoin(
-                    self.base_url,
-                    url_product_soup[0].get('href'))
-                proper_url = url.split("/ref=")[0]
-                product_dict['url'] = proper_url
-                if "slredirect" not in proper_url:  # slredirect = bad url
-                    self.product_dict_list.append(product_dict)
+            if len(self.product_dict_list) >= max_product_nb:
+                # Check if the maximum number to search has been reached
+                break
+            else:
+                product_dict = {}
+                title = _css_select(product, TITLE_CSS_SELECTOR)
+                product_dict['title'] = title
+                rating = _css_select(product, RATING_CSS_SELECTOR)
+                review_nb = _css_select(product,
+                                        CUSTOMER_REVIEW_NB_CSS_SELECTOR)
+                if rating:
+                    proper_rating = rating.split(" ")[0].strip()
+                    product_dict['rating'] = proper_rating
+                if review_nb:
+                    proper_review_nb = review_nb.split("(")[1].split(")")[0]
+                    product_dict['review_nb'] = proper_review_nb
+                url_product_soup = product.select(URL_CSS_SELECTOR)
+                if url_product_soup:
+                    url = urljoin(
+                        self.base_url,
+                        url_product_soup[0].get('href'))
+                    proper_url = url.split("/ref=")[0]
+                    product_dict['url'] = proper_url
+                    if "slredirect" not in proper_url:  # slredirect = bad url
+                        self.product_dict_list.append(product_dict)
 
-        # Check if there is another page
-        url_next_page_soup = soup.select(NEXT_PAGE_URL_CSS_SELECTOR)
-        if url_next_page_soup:
-            url_next_page = urljoin(
-                self.base_url,
-                url_next_page_soup[0].get('href'))
-            self._get_products(search_url=url_next_page)
+        if len(self.product_dict_list) < max_product_nb:
+            # Check if there is another page
+            # only if we have not already reached the max number of products
+            url_next_page_soup = soup.select(NEXT_PAGE_URL_CSS_SELECTOR)
+            if url_next_page_soup:
+                url_next_page = urljoin(
+                    self.base_url,
+                    url_next_page_soup[0].get('href'))
+                self._get_products(search_url=url_next_page,
+                                   max_product_nb=max_product_nb)
 
         return self.product_dict_list
 

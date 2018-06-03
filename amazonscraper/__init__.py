@@ -64,10 +64,13 @@ class Product(object):
         return self.product.get(attr, "")
 
 
-def get_products(keywords="", url=""):
+def search(keywords="", search_url="", max_product_nb=100):
     """Function to get the list of products from amazon"""
     amz = Client()
-    product_dict_list = amz._get_products(keywords=keywords, search_url=url)
+    product_dict_list = amz._get_products(
+        keywords=keywords,
+        search_url=search_url,
+        max_product_nb=max_product_nb)
     products = Products(product_dict_list)
 
     return products
