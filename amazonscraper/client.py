@@ -98,6 +98,9 @@ class Client(object):
                                         css_selector_dict.get("review_nb", ""))
                 if rating:
                     proper_rating = rating.split(" ")[0].strip()
+                    # In French results, ratings with comma
+                    # Replace it with a dot (3,5 => 3.5)
+                    proper_rating = proper_rating.replace(",", ".")
                     product_dict['rating'] = proper_rating
                 if review_nb:
                     proper_review_nb = review_nb.split("(")[1].split(")")[0]
