@@ -47,7 +47,7 @@ More info about the command in the help :
 amazon2csv --help
 ```
 
-# Using the amazonscraper Python package
+# Using the `amazonscraper` Python package
 
 ```python
 # -*- coding: utf-8 -*-
