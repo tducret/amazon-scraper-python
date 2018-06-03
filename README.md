@@ -12,7 +12,7 @@ This package allows you to search for products on [Amazon](https://www.amazon.co
 # Installation
 
 ```bash
-pip3 install -U amazon
+pip3 install -U amazonscraper
 ```
 
 # Command line tool `amz`
@@ -37,13 +37,13 @@ More info about the command in the help :
 amz --help
 ```
 
-# Using the amazon Python package
+# Using the amazonscraper Python package
 
 ```python
 # -*- coding: utf-8 -*-
-import amazon as amz
+import amazonscraper
 
-results = amz.search("Python programming")
+results = amazonscraper.search("Python programming")
 
 for result in results:
     print("%s (%.2f out of 5 stars, %d customer reviews) :  %s" % (result.title, result.rating, result.review_nb, result.url))
@@ -73,4 +73,3 @@ url 				| Product URL
 
 # TODO
 - Add a max number of results
-- Rename the Pypi package ('Amazon' is not allowed)
