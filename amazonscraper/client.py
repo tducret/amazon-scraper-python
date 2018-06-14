@@ -6,10 +6,24 @@ Module to get and parse the product info on Amazon
 import requests
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
+import time
 
 _BASE_URL = "https://www.amazon.com/"
 _DEFAULT_BEAUTIFULSOUP_PARSER = "html.parser"
-CSS_SELECTORS_1 = {
+_DEFAULT_USER_AGENT = 'Mozilla/5.0 (Linux; Android 7.0; \
+                        SM-A520F Build/NRD90M; wv) AppleWebKit/537.36 \
+                        (KHTML, like Gecko) Version/4.0 \
+                        Chrome/65.0.3325.109 Mobile Safari/537.36'
+_CHROME_DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; \
+        Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) \
+        Chrome/67.0.3396.79 Safari/537.36'
+
+_USER_AGENT_LIST = [
+                    _DEFAULT_USER_AGENT,
+                    _CHROME_DESKTOP_USER_AGENT,
+                   ]
+
+_CSS_SELECTORS_MOBILE = {
     "product": "#resultItems > li",
     "title": "a > div > div.sx-table-detail > h5 > span",
     "rating": "a > div > div.sx-table-detail > \
@@ -20,7 +34,7 @@ CSS_SELECTORS_1 = {
     "next_page_url": "ul.a-pagination > li.a-last > a['href']",
 }
 # Sometimes, the result page is displayed with another layout
-CSS_SELECTORS_2 = {
+_CSS_SELECTORS_MOBILE_GRID = {
     "product": "#grid-atf-content > li > div.s-item-container",
     "title": "a > div > h5.sx-title > span",
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
@@ -28,6 +42,26 @@ CSS_SELECTORS_2 = {
     "url": "a['href']",
     "next_page_url": "ul.a-pagination > li.a-last > a['href']",
 }
+_CSS_SELECTORS_DESKTOP = {
+    "product": "ul > li.s-result-item > div.s-item-container",
+    "title": "a.s-access-detail-page > h2",
+    "rating": "i.a-icon-star > span",
+    "review_nb": "div.a-column.a-span5.a-span-last > \
+                div.a-row.a-spacing-mini > \
+                a.a-size-small.a-link-normal.a-text-normal",
+    "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a['href']",
+    "next_page_url": "a#pagnNextLink",
+}
+
+_CSS_SELECTOR_LIST = [
+                        _CSS_SELECTORS_MOBILE,
+                        _CSS_SELECTORS_MOBILE_GRID,
+                        _CSS_SELECTORS_DESKTOP,
+                     ]
+
+# Maximum number of requests to do if Amazon returns a bad page (anti-scraping)
+_MAX_TRIAL_REQUESTS = 5
+_WAIT_TIME_BETWEEN_REQUESTS = 1
 
 
 class Client(object):
@@ -37,16 +71,21 @@ class Client(object):
         """ Init of the client """
 
         self.session = requests.session()
+        self.current_user_agent_index = 0
         self.headers = {
                     'Host': 'www.amazon.com',
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 7.0; \
-                        SM-A520F Build/NRD90M; wv) AppleWebKit/537.36 \
-                        (KHTML, like Gecko) Version/4.0 \
-                        Chrome/65.0.3325.109 Mobile Safari/537.36',
+                    'User-Agent': _USER_AGENT_LIST[0],
                     'Accept': 'text/html,application/xhtml+xml,\
                         application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                     }
         self.product_dict_list = []
+
+    def _change_user_agent(self):
+        """ Change the User agent of the requests
+        (useful if anti-scraping) """
+        index = (self.current_user_agent_index + 1) % len(_USER_AGENT_LIST)
+        self.headers['User-Agent'] = _USER_AGENT_LIST[index]
+        self.current_user_agent_index = index
 
     def _get(self, url):
         """ GET request with the proper headers """
@@ -67,21 +106,41 @@ class Client(object):
         search_url = urljoin(_BASE_URL, ("s/field-keywords=%s" % (keywords)))
         return search_url
 
+    def _check_page(self, html_content):
+        """ Check if the page is a valid result page
+        (even if there is no result) """
+        if "Sign in for the best experience" in html_content:
+            valid_page = False
+        else:
+            valid_page = True
+        return valid_page
+
     def _get_products(self, keywords="", search_url="", max_product_nb=100):
         if search_url == "":
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
-        res = self._get(search_url)
+
+        trials = 0
+        while trials < _MAX_TRIAL_REQUESTS:
+            trials += 1
+            res = self._get(search_url)
+            valid_page = self._check_page(res.text)
+            if valid_page:
+                break
+            else:
+                self._change_user_agent()
+                time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
+
         self.last_html_page = res.text
         soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
-        css_selector_dict = CSS_SELECTORS_1
-
-        products = soup.select(css_selector_dict.get("product", ""))
-        if len(products) < 1:
-            # Test the other css selectors
-            css_selector_dict = CSS_SELECTORS_2
-            products = soup.select(css_selector_dict.get("product", ""))
+        selector = 0
+        for css_selector_dict in _CSS_SELECTOR_LIST:
+            selector += 1
+            css_selector = css_selector_dict.get("product", "")
+            products = soup.select(css_selector)
+            if len(products) >= 1:
+                break
 
         # For each product of the result page
         for product in products:
@@ -97,17 +156,24 @@ class Client(object):
                                      css_selector_dict.get("rating", ""))
                 review_nb = _css_select(product,
                                         css_selector_dict.get("review_nb", ""))
-                if rating:
+                if rating != "":
                     proper_rating = rating.split(" ")[0].strip()
                     # In French results, ratings with comma
                     # Replace it with a dot (3,5 => 3.5)
                     proper_rating = proper_rating.replace(",", ".")
                     product_dict['rating'] = proper_rating
-                if review_nb:
-                    proper_review_nb = review_nb.split("(")[1].split(")")[0]
+                if review_nb != "":
+                    if len(review_nb.split("(")) > 1:
+                        proper_review_nb = review_nb.split("(")[1].\
+                                           split(")")[0]
+                    else:
+                        proper_review_nb = review_nb
+                    # Remove the comma for thousands (2,921 => 2921)
+                    proper_review_nb = proper_review_nb.replace(",", "")
                     product_dict['review_nb'] = proper_review_nb
-                url_product_soup = product.select(
-                                   css_selector_dict.get("url", ""))
+
+                css_selector = css_selector_dict.get("url", "")
+                url_product_soup = product.select(css_selector)
                 if url_product_soup:
                     url = urljoin(
                         self.base_url,
@@ -120,8 +186,8 @@ class Client(object):
         if len(self.product_dict_list) < max_product_nb:
             # Check if there is another page
             # only if we have not already reached the max number of products
-            url_next_page_soup = soup.select(
-                                 css_selector_dict.get("next_page_url", ""))
+            css_selector = css_selector_dict.get("next_page_url", "")
+            url_next_page_soup = soup.select(css_selector)
             if url_next_page_soup:
                 url_next_page = urljoin(
                     self.base_url,
@@ -133,11 +199,14 @@ class Client(object):
 
 
 def _css_select(soup, css_selector):
-        """ Renvoie le contenu de l'élément du sélecteur CSS, ou une
-        chaine vide """
+        """ Returns the content of the element pointed by the CSS selector,
+        or an empty string if not found """
         selection = soup.select(css_selector)
         if len(selection) > 0:
-            retour = selection[0].text.strip()
+            if hasattr(selection[0], 'text'):
+                retour = selection[0].text.strip()
+            else:
+                retour = ""
         else:
-            retour = False
+            retour = ""
         return retour
