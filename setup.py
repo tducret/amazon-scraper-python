@@ -48,7 +48,7 @@ setup(
 # ------------------------------------------
 # Make sure everything was pushed (with a git status)
 # (or git commit --am "Comment" and git push)
-# git tag 0.0.5 -m "Rename the amz command to amazon2csv"
+# git tag 0.0.6 -m "Changed amazon2csv to amazon2csv.py"
 # git push --tags
 
 # Do a generation test on the pypi test repository

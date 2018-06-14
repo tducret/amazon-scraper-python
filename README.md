@@ -15,14 +15,14 @@ This package allows you to search for products on [Amazon](https://www.amazon.co
 pip3 install -U amazonscraper
 ```
 
-# Command line tool `amazon2csv`
+# Command line tool `amazon2csv.py`
 
-After the package installation, you can use the `amazon2csv` command in the terminal.
+After the package installation, you can use the `amazon2csv.py` command in the terminal.
 
 After passing a search request to the command (and an optional maximum number of products), it will return the results as csv :
 
 ```bash
-amazon2csv --keywords="Python programming" --maxproductnb=2
+amazon2csv.py --keywords="Python programming" --maxproductnb=2
 ```
 
 ```csv
@@ -34,7 +34,7 @@ Product title,Rating,Number of customer reviews,Product URL
 You can also pass a search url (if you added complex filters for example), and save it to a file :
 
 ```bash
-amazon2csv --url="https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=python+scraping" > output.csv
+amazon2csv.py --url="https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=python+scraping" > output.csv
 ```
 
 You can then open it with your favorite spreadsheet editor (and play with the filters) :
@@ -44,7 +44,7 @@ You can then open it with your favorite spreadsheet editor (and play with the fi
 More info about the command in the help :
 
 ```bash
-amazon2csv --help
+amazon2csv.py --help
 ```
 
 # Using the `amazonscraper` Python package

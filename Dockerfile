@@ -8,4 +8,4 @@ FROM python:3
 
 RUN pip3 install -U --no-cache-dir amazonscraper
 
-ENTRYPOINT [ "amazon2csv" ]
+ENTRYPOINT [ "amazon2csv.py" ]
