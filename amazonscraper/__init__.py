@@ -13,6 +13,7 @@ class Products(object):
     """Class of the products"""
     def __init__(self, product_dict_list=[]):
         self.products = []
+        self.last_html_page = ""  # HTML content of the last scraped page
         for product_dict in product_dict_list:
             self._add_product(product_dict)
 
@@ -72,5 +73,6 @@ def search(keywords="", search_url="", max_product_nb=100):
         search_url=search_url,
         max_product_nb=max_product_nb)
     products = Products(product_dict_list)
+    products.last_html_page = amz.last_html_page
 
     return products

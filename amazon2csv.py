@@ -34,7 +34,13 @@ https://www.amazon.com/s/field-keywords=python%2Bscraping',
     version=amazonscraper.__version__,
     message='%(prog)s, based on amazonscraper module version %(version)s'
 )
-def main(keywords, url, csvseparator, maxproductnb):
+@click.option(
+    '--outputhtml', '-o',
+    type=str,
+    help='Save the html page to the current folder with the specified name',
+    default="",
+)
+def main(keywords, url, csvseparator, maxproductnb, outputhtml):
     """ Search for products on Amazon, and extract it as CSV """
     products = amazonscraper.search(
                                     keywords=keywords,
@@ -42,6 +48,10 @@ def main(keywords, url, csvseparator, maxproductnb):
                                     max_product_nb=maxproductnb)
 
     print(products.csv(separator=csvseparator))
+
+    if (outputhtml != ""):
+        with open(outputhtml, "w") as f:
+            f.write(products.last_html_page)
 
 
 if __name__ == "__main__":

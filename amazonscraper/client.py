@@ -72,6 +72,7 @@ class Client(object):
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
         res = self._get(search_url)
+        self.last_html_page = res.text
         soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
         css_selector_dict = CSS_SELECTORS_1
