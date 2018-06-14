@@ -14,7 +14,7 @@ _DESCRIPTION = 'Package to search for products on Amazon and extract \
 some useful information (title, ratings, number of reviews)'
 _MOTS_CLES = ['api', 'amazon', 'python', 'amazonscraper', 'parsing',
               'python-wrapper', 'scraping', 'scraper', 'parser']
-_SCRIPTS = ['amazon2csv']
+_SCRIPTS = ['amazon2csv.py']
 # To delete here + 'scripts' dans setup()
 # if no command is used in the package
 
@@ -48,7 +48,7 @@ setup(
 # ------------------------------------------
 # Make sure everything was pushed (with a git status)
 # (or git commit --am "Comment" and git push)
-# git tag VERSION -m "Comment"
+# git tag 0.0.5 -m "Rename the amz command to amazon2csv"
 # git push --tags
 
 # Do a generation test on the pypi test repository
