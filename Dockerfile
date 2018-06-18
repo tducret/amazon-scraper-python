@@ -1,6 +1,6 @@
 FROM python:3
 
-# This dockerfile allows you to use the amzon2csv.py command very easily
+# This dockerfile allows you to use the amzon2csv.py command very easily 
 
 # You can build the docker image with the command :
 # docker build --no-cache -t amazon2csv .
