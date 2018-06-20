@@ -52,11 +52,20 @@ _CSS_SELECTORS_DESKTOP = {
     "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a['href']",
     "next_page_url": "a#pagnNextLink",
 }
+_CSS_SELECTORS_DESKTOP_2 = {
+    "product": "div.s-result-list.sg-row > div.s-result-item",
+    "title": "div div.sg-row  h5 > span",
+    "rating": "div div.sg-row .a-spacing-top-mini i span",
+    "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
+    "url": "div div.sg-col-8-of-12 a.a-link-normal",
+    "next_page_url": "li.a-last",
+}
 
 _CSS_SELECTOR_LIST = [
                         _CSS_SELECTORS_MOBILE,
                         _CSS_SELECTORS_MOBILE_GRID,
                         _CSS_SELECTORS_DESKTOP,
+                        _CSS_SELECTORS_DESKTOP_2,
                      ]
 
 # Maximum number of requests to do if Amazon returns a bad page (anti-scraping)
