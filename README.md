@@ -86,5 +86,5 @@ url 				| Product URL
 
 ## TODO
 
-[] If no product was found with the CSS selectors, it may be a new Amazon page style => change user agent and get the new page. Loop on all the user agents and check all the CSS selectors again
-[] Find a way to get the products without css selectors
+- [ ] If no product was found with the CSS selectors, it may be a new Amazon page style => change user agent and get the new page. Loop on all the user agents and check all the CSS selectors again
+- [ ] Find a way to get the products without css selectors
