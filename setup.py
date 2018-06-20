@@ -7,7 +7,7 @@ except ImportError:  # For pip <= 9
 
 # Based on http://peterdowns.com/posts/first-time-with-pypi.html
 
-__version__ = '0.0.7'  # Should match with __init.py__
+__version__ = '0.0.8'  # Should match with __init.py__
 _NOM_PACKAGE = 'amazonscraper'
 _URL_GITHUB = 'https://github.com/tducret/amazon-scraper-python'
 _DESCRIPTION = 'Package to search for products on Amazon and extract \
@@ -48,7 +48,7 @@ setup(
 # ------------------------------------------
 # Make sure everything was pushed (with a git status)
 # (or git commit --am "Comment" and git push)
-# git tag 0.0.7 -m "Reliability improved"
+# git tag 0.0.8 -m "Reliability improved"
 # git push --tags
 
 # Do a generation test on the pypi test repository
