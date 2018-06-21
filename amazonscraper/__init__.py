@@ -18,6 +18,20 @@ class Products(object):
             self._add_product(product_dict)
 
     def _add_product(self, product_dict):
+        """ Append a product to the object product list
+        >>> p = Products([{'title':'Book title', 'rating': '4.2',\
+'review_nb': '15', 'url':'http://www.amazon.com/book'}])
+        >>> p.products[1]
+        Traceback (most recent call last):
+        ...
+        IndexError: list index out of range
+        >>> p._add_product({'title':'Book title 2', 'rating': '4.3',\
+'review_nb': '12', 'url':'http://www.amazon.com/book2'})
+        >>> len(p.products)
+        2
+        >>> print(p[1].title)
+        Book title 2
+        """
         product = Product(product_dict)
         self.products.append(product)
 
@@ -33,6 +47,21 @@ class Products(object):
         return self.products[key]
 
     def csv(self, separator=","):
+        """ Returns a CSV string with the product info
+        >>> p = Products([{'title':'Book title', 'rating': '4.2',\
+'review_nb': '15', 'url':'http://www.amazon.com/book'}])
+        >>> p.csv()
+        'Product title,Rating,Number of customer reviews,\
+Product URL\\n"Book title",4.2,15,http://www.amazon.com/book'
+
+        >>> print(p.csv(separator=";"))
+        Product title;Rating;Number of customer reviews;Product URL
+        "Book title";4,2;15;http://www.amazon.com/book
+
+        >>> p2 = Products()
+        >>> p2.csv()
+        'Product title,Rating,Number of customer reviews,Product URL'
+        """
         csv_string = separator.join([
                                     "Product title",
                                     "Rating",
@@ -76,3 +105,8 @@ def search(keywords="", search_url="", max_product_nb=100):
     products.last_html_page = amz.last_html_page
 
     return products
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

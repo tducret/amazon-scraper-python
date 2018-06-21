@@ -11,12 +11,12 @@ import time
 _BASE_URL = "https://www.amazon.com/"
 _DEFAULT_BEAUTIFULSOUP_PARSER = "html.parser"
 _DEFAULT_USER_AGENT = 'Mozilla/5.0 (Linux; Android 7.0; \
-                        SM-A520F Build/NRD90M; wv) AppleWebKit/537.36 \
-                        (KHTML, like Gecko) Version/4.0 \
-                        Chrome/65.0.3325.109 Mobile Safari/537.36'
+SM-A520F Build/NRD90M; wv) AppleWebKit/537.36 \
+(KHTML, like Gecko) Version/4.0 \
+Chrome/65.0.3325.109 Mobile Safari/537.36'
 _CHROME_DESKTOP_USER_AGENT = 'Mozilla/5.0 (Macintosh; \
-        Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) \
-        Chrome/67.0.3396.79 Safari/537.36'
+Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) \
+Chrome/67.0.3396.79 Safari/537.36'
 
 _USER_AGENT_LIST = [
                     _DEFAULT_USER_AGENT,
@@ -91,7 +91,22 @@ class Client(object):
 
     def _change_user_agent(self):
         """ Change the User agent of the requests
-        (useful if anti-scraping) """
+        (useful if anti-scraping)
+        >>> c = Client()
+        >>> c.current_user_agent_index
+        0
+        >>> c.headers['User-Agent'] == _USER_AGENT_LIST[0]
+        True
+        >>> c._change_user_agent()
+        >>> c.current_user_agent_index
+        1
+        >>> c.headers['User-Agent'] == _USER_AGENT_LIST[1]
+        True
+        >>> c2 = Client()
+        >>> for i in range(0,9): c2._change_user_agent()
+        >>> c2.current_user_agent_index == 9 % len(_USER_AGENT_LIST)
+        True
+        """
         index = (self.current_user_agent_index + 1) % len(_USER_AGENT_LIST)
         self.headers['User-Agent'] = _USER_AGENT_LIST[index]
         self.current_user_agent_index = index
@@ -105,13 +120,24 @@ class Client(object):
         return self.session.post(url, headers=self.headers, data=post_data)
 
     def _update_headers(self, search_url):
+        """ Update the 'Host' field in the header with the proper Amazon domain
+        >>> c = Client()
+        >>> print(c.headers['Host'])
+        www.amazon.com
+        >>> c._update_headers("https://www.amazon.fr/s/lkdjsdlkjlk")
+        >>> print(c.headers['Host'])
+        www.amazon.fr
+        """
         self.base_url = "https://" + \
-                search_url.split("://")[1].split("/")[0] + "/"
-        # https://www.amazon.com/s/lkdjsdlkjlk => https://www.amazon.com/
+            search_url.split("://")[1].split("/")[0] + "/"
         self.headers['Host'] = self.base_url.split("://")[1].split("/")[0]
-        # https://www.amazon.com/ => www.amazon.com
 
     def _get_search_url(self, keywords):
+        """ Get the Amazon search URL, based on the keywords passed
+        >>> c = Client()
+        >>> print(c._get_search_url(keywords="python"))
+        https://www.amazon.com/s/field-keywords=python
+        """
         search_url = urljoin(_BASE_URL, ("s/field-keywords=%s" % (keywords)))
         return search_url
 
@@ -219,3 +245,8 @@ def _css_select(soup, css_selector):
         else:
             retour = ""
         return retour
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
