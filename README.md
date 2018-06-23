@@ -1,6 +1,6 @@
 # amazon-scraper-python
 
-[![Build Status](https://travis-ci.org/thibdct/amazon-scraper-python.svg?branch=master)](https://travis-ci.org/tducret/amazon-scraper-python)
+[![Build Status](https://travis-ci.org/tducret/amazon-scraper-python.svg?branch=master)](https://travis-ci.org/tducret/amazon-scraper-python)
 ![License](https://img.shields.io/badge/license-MIT-lightgray.svg) 
 
 # Description
