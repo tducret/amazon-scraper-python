@@ -158,10 +158,15 @@ class Client(object):
         trials = 0
         while trials < _MAX_TRIAL_REQUESTS:
             trials += 1
-            res = self._get(search_url)
-            valid_page = self._check_page(res.text)
+            try:
+                res = self._get(search_url)
+                valid_page = self._check_page(res.text)
+            except requests.exceptions.SSLError:
+                # To counter the "SSLError bad handshake" exception
+                valid_page = False
+                pass
             if valid_page:
-                break
+                    break
             else:
                 self._change_user_agent()
                 time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
