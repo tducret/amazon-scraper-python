@@ -98,8 +98,3 @@ def search(keywords="", search_url="", max_product_nb=100):
     products.last_html_page = amz.last_html_page
 
     return products
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

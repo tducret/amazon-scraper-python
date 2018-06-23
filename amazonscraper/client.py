@@ -246,8 +246,3 @@ def _css_select(soup, css_selector):
         else:
             retour = ""
         return retour
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
