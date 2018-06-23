@@ -1,5 +1,8 @@
 # amazon-scraper-python
 
+[![Build Status](https://travis-ci.org/thibdct/amazon-scraper-python.svg?branch=master)](https://travis-ci.org/tducret/amazon-scraper-python)
+![License](https://img.shields.io/badge/license-MIT-lightgray.svg) 
+
 # Description
 
 This package allows you to search for products on [Amazon](https://www.amazon.com/) and extract some useful information (ratings, number of comments).
