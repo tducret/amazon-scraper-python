@@ -4,7 +4,6 @@ useful information (title, ratings, number of reviews).
 """
 from builtins import object
 from amazonscraper.client import Client
-import json
 
 __version__ = '0.0.9'  # Should be the same in setup.py
 
@@ -34,9 +33,6 @@ class Products(object):
         """
         product = Product(product_dict)
         self.products.append(product)
-
-    def __repr__(self):
-        return json.dumps(self.products, indent=1)
 
     def __len__(self):
         return len(self.products)
@@ -84,9 +80,6 @@ class Product(object):
     """Class of a product"""
     def __init__(self, product_dict={}):
         self.product = product_dict
-
-    def __repr__(self):
-        return json.dumps(self.products, indent=1)
 
     def __getattr__(self, attr):
         """ Method to access a dictionnary key as an attribute

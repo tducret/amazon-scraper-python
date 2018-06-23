@@ -10,6 +10,6 @@ before_script:
   - pip install pytest-cov
 # command to run tests
 script:
-  - pytest --cov amazonscraper # or py.test for Python versions 3.5 and below
+  - pytest # or py.test for Python versions 3.5 and below
 after_success:
   coveralls

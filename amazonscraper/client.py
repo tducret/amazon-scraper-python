@@ -115,10 +115,6 @@ class Client(object):
         """ GET request with the proper headers """
         return self.session.get(url, headers=self.headers)
 
-    def _post(self, url, post_data):
-        """ POST request with the proper headers """
-        return self.session.post(url, headers=self.headers, data=post_data)
-
     def _update_headers(self, search_url):
         """ Update the 'Host' field in the header with the proper Amazon domain
         >>> c = Client()
