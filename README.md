@@ -1,7 +1,7 @@
 # amazon-scraper-python
 
 [![Build Status](https://travis-ci.org/tducret/amazon-scraper-python.svg?branch=master)](https://travis-ci.org/tducret/amazon-scraper-python)
-[![Coverage Status](https://coveralls.io/repos/github/tducret/amazon-scraper-python/badge.svg)](https://coveralls.io/repos/github/tducret/amazon-scraper-python)
+[![Coverage Status](https://coveralls.io/repos/github/tducret/amazon-scraper-python/badge.svg)](https://coveralls.io/github/tducret/amazon-scraper-python)
 ![License](https://img.shields.io/badge/license-MIT-lightgray.svg) 
 
 # Description
