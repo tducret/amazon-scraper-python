@@ -3,7 +3,8 @@
 [![Travis](https://img.shields.io/travis/tducret/amazon-scraper-python.svg)](https://travis-ci.org/tducret/amazon-scraper-python)
 [![Coveralls github](https://img.shields.io/coveralls/github/tducret/amazon-scraper-python.svg)](https://coveralls.io/github/tducret/amazon-scraper-python)
 [![PyPI](https://img.shields.io/pypi/v/amazonscraper.svg)](https://pypi.org/project/amazonscraper/)
-![License](https://img.shields.io/badge/license-MIT-lightgray.svg) 
+![License](https://img.shields.io/github/license/tducret/amazon-scraper-python.svg)
+
 
 # Description
 
