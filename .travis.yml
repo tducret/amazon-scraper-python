@@ -7,4 +7,4 @@ install:
   - pip install .
 # command to run tests
 script:
-  - pytest # or py.test for Python versions 3.5 and below
+  - pytest --doctest-modules # or py.test for Python versions 3.5 and below
