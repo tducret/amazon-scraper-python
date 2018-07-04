@@ -23,8 +23,8 @@ uninstall(){
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
-    echo "docker rmi $DOCKER_IMAGE"
-    echo "rm $0"
+    docker rmi $DOCKER_IMAGE
+    rm $0
   fi
   exit 1
 }
