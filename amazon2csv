@@ -31,8 +31,6 @@ uninstall(){
 
 # Checks for dependencies
 check_cmd_in_path docker
-check_cmd_in_path docker-machine
-docker-machine active > /dev/null 2>&1 || error 2 "docker-machine needs to be running."
 
 case $1 in
     --uninstall)
