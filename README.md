@@ -3,6 +3,7 @@
 [![Travis](https://img.shields.io/travis/tducret/amazon-scraper-python.svg)](https://travis-ci.org/tducret/amazon-scraper-python)
 [![Coveralls github](https://img.shields.io/coveralls/github/tducret/amazon-scraper-python.svg)](https://coveralls.io/github/tducret/amazon-scraper-python)
 [![PyPI](https://img.shields.io/pypi/v/amazonscraper.svg)](https://pypi.org/project/amazonscraper/)
+[![Docker Build Status](https://img.shields.io/docker/build/thibdct/amazon2csv.svg)](https://hub.docker.com/r/thibdct/amazon2csv/)
 ![License](https://img.shields.io/github/license/tducret/amazon-scraper-python.svg)
 
 
@@ -89,6 +90,46 @@ review_nb	        | Number of customer reviews (False if missing)
 url 				| Product URL
 
 --------------
+
+# Docker
+
+You can use the amazon2csv tool with the [Docker image](https://hub.docker.com/r/thibdct/amazon2csv/)
+
+You may execute :
+
+`docker run -it --rm thibdct/amazon2csv --keywords="Python programming" --maxproductnb=2`
+
+## The easy way
+
+I also built a bash wrapper to execute the Docker container easily.
+
+Install it with :
+
+```bash
+curl -sO https://raw.githubusercontent.com/tducret/amazon-scraper-python/master/amazon2csv > /usr/local/bin/amazon2csv
+```
+*You may replace `/usr/local/bin` with another folder that is in your $PATH*
+
+Check that it works :
+
+*On the first execution, the script will download the Docker image, so please be patient*
+
+```bash
+amazon2csv --help
+amazon2csv --keywords="Python programming" --maxproductnb=2
+```
+
+You can upgrade the app with :
+
+```bash
+amazon2csv --upgrade
+```
+
+and even uninstall with :
+
+```bash
+amazon2csv --uninstall
+```
 
 ## TODO
 
