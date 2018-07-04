@@ -99,14 +99,15 @@ You may execute :
 
 `docker run -it --rm thibdct/amazon2csv --keywords="Python programming" --maxproductnb=2`
 
-## The easy way
+## 🤘 The easy way 🤘
 
 I also built a bash wrapper to execute the Docker container easily.
 
 Install it with :
 
 ```bash
-curl -s https://raw.githubusercontent.com/tducret/amazon-scraper-python/master/amazon2csv > /usr/local/bin/amazon2csv && chmod +x /usr/local/bin/amazon2csv
+curl -s https://raw.githubusercontent.com/tducret/amazon-scraper-python/master/amazon2csv \
+> /usr/local/bin/amazon2csv && chmod +x /usr/local/bin/amazon2csv
 ```
 *You may replace `/usr/local/bin` with another folder that is in your $PATH*
 
