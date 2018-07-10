@@ -2,12 +2,12 @@ language: python
 python:
   - "3.6"
 # command to install dependencies
-install:
-  - pip install .
 before_script:
   - pip install -r requirements.txt
   - pip install python-coveralls
   - pip install pytest-cov
+install:
+  - pip install .
 # command to run tests
 script:
   - pytest # or py.test for Python versions 3.5 and below
