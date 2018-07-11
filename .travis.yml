@@ -13,3 +13,11 @@ script:
   - pytest # or py.test for Python versions 3.5 and below
 after_success:
   coveralls
+deploy:
+  provider: pypi
+  user: "thibdct"
+  password:
+    # To be generated in the repo path, with travis encrypt <PASSWORD>
+    secure: "fAElle3s1UbGZ3vrYoOKp51TwMAsb2mcVnqoLUjRmPDENTjnOAGws9g8fDI1NlwuOhFBe7UCJucSOUf0muY97sdZAPFqH6VZ2xWmWVTDzGpsSWuQ4CdW0LnmIHXM3Sundh4gHYXtSLXvbXnq2uthF6/34fQoIMpoO0I6CPLkR1t3xdD6QNajFrdLeBPDnl2AfoNG3F814r48+bRpV8nHSbaDk9bSL7Io7HwRyodUv5jJ7ubNP8K25B7E5y3e9dCzGQM4+Nx/6m9+3HBJEXf68VwyTVtZgvGDy2OI7z4KdoTt9nfSJQr5R9sFvReT7W7H1cG4g/on3EJwf+14Hp1+Od0O55pJQwNr4BQdxwk07ZKbdy3K4xZ9wu3Wfp+nicV7nsP3KFWh1DnyBxXw95Yh1uBeWvO5SxgJcHF/SZmPqGVNrcg9X7hJ4SMucFAHeezkA6xnl5bzvvHmtprt0C/kvHKvDFl3m2t2NPjIz/mND/xnEEgidiGZ+egCqHNkq8YjLKilEva2JMSk8DFacThqQzxcffCeTpKErAzYhPWsP5WD+as4zR9IoOiL4YlI2pg4bsi/y45lMXluq02KxyFpWMExCWnjCSg2I+yvNqO2scn9525q4+b7zXhBc2qq/a3wcc/1NFzwU1BprspjkHoC3GmvOdTNtPsmNmmJKRuTyLY="
+  on:
+    tags: true
