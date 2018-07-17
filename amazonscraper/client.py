@@ -113,7 +113,12 @@ class Client(object):
 
     def _get(self, url):
         """ GET request with the proper headers """
-        return self.session.get(url, headers=self.headers)
+        ret = self.session.get(url, headers=self.headers)
+        if ret.status_code != 200:
+            raise ConnectionError(
+                'Status code {status} for url {url}\n{content}'.format(
+                    status=ret.status_code, url=url, content=ret.text))
+        return ret
 
     def _update_headers(self, search_url):
         """ Update the 'Host' field in the header with the proper Amazon domain
@@ -161,6 +166,9 @@ class Client(object):
                 valid_page = self._check_page(res.text)
             except requests.exceptions.SSLError:
                 # To counter the "SSLError bad handshake" exception
+                valid_page = False
+                pass
+            except ConnectionError:
                 valid_page = False
                 pass
             if valid_page:
