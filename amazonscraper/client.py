@@ -142,6 +142,8 @@ class Client(object):
         (even if there is no result) """
         if "Sign in for the best experience" in html_content:
             valid_page = False
+        elif "The request could not be satisfied." in html_content:
+            valid_page = False
         else:
             valid_page = True
         return valid_page
