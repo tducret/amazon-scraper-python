@@ -30,6 +30,7 @@ _CSS_SELECTORS_MOBILE = {
                div.a-icon-row.a-size-small > i > span",
     "review_nb": "a > div > div.sx-table-detail > \
                   div.a-icon-row.a-size-small > span",
+    "price" : "div.a-row > span.a-color-price", 
     "url": "a['href']",
     "next_page_url": "ul.a-pagination > li.a-last > a['href']",
 }
@@ -39,6 +40,7 @@ _CSS_SELECTORS_MOBILE_GRID = {
     "title": "a > div > h5.sx-title > span",
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
     "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
+    "price" : "div.a-section > span.a-color-price", 
     "url": "a['href']",
     "next_page_url": "ul.a-pagination > li.a-last > a['href']",
 }
@@ -49,6 +51,7 @@ _CSS_SELECTORS_DESKTOP = {
     "review_nb": "div.a-column.a-span5.a-span-last > \
                 div.a-row.a-spacing-mini > \
                 a.a-size-small.a-link-normal.a-text-normal",
+    "price" : "a.a-link-normal > span.a-offscreen", 
     "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a['href']",
     "next_page_url": "a#pagnNextLink",
 }
@@ -57,6 +60,7 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "title": "div div.sg-row  h5 > span",
     "rating": "div div.sg-row .a-spacing-top-mini i span",
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
+    "price" : "a.a-link-normal > span.a-offscreen",
     "url": "div div.sg-col-8-of-12 a.a-link-normal",
     "next_page_url": "li.a-last",
 }
@@ -217,7 +221,15 @@ class Client(object):
                     # Remove the comma for thousands (2,921 => 2921)
                     proper_review_nb = proper_review_nb.replace(",", "")
                     product_dict['review_nb'] = proper_review_nb
-
+                #checks if the price has a good form otherwise returns a N/A
+                price = title = _css_select(product,
+                                    css_selector_dict.get("price", ""))
+                product_dict['price'] = price.replace(",", ".")
+                try:
+                    float(price[1:])
+                    product_dict['price'] = price
+                except ValueError:
+                    product_dict['price'] = 'N/A'
                 css_selector = css_selector_dict.get("url", "")
                 url_product_soup = product.select(css_selector)
                 if url_product_soup:

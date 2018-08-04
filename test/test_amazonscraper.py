@@ -25,6 +25,7 @@ def test_amazonscraper_get_products_with_url():
     assert product.title != ""
     assert product.review_nb != ""
     assert product.rating != ""
+    assert product.price != ""
     assert product.url != ""
 
 
@@ -42,5 +43,5 @@ def test_amazonscraper_csv_header():
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=1)
-    assert "Product title,Rating,Number of customer reviews,Product URL\n" \
+    assert "Product title,Rating,Number of customer reviews,Price indication,Product URL\n" \
         in str(products.csv())

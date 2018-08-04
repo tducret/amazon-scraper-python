@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ This package allows you to search for products on Amazon and extract some
-useful information (title, ratings, number of reviews).
+useful information (title, ratings, number of reviews, price).
 """
 from builtins import object
 from amazonscraper.client import Client
@@ -19,13 +19,13 @@ class Products(object):
     def _add_product(self, product_dict):
         """ Append a product to the object product list
         >>> p = Products([{'title':'Book title', 'rating': '4.2',\
-'review_nb': '15', 'url':'http://www.amazon.com/book'}])
+'review_nb': '15', 'price' : '$2.99', 'url':'http://www.amazon.com/book'}])
         >>> p.products[1]
         Traceback (most recent call last):
         ...
         IndexError: list index out of range
         >>> p._add_product({'title':'Book title 2', 'rating': '4.3',\
-'review_nb': '12', 'url':'http://www.amazon.com/book2'})
+'review_nb': '12', 'price' : '$2.99', 'url':'http://www.amazon.com/book2'})
         >>> len(p.products)
         2
         >>> print(p[1].title)
@@ -45,23 +45,24 @@ class Products(object):
     def csv(self, separator=","):
         """ Returns a CSV string with the product info
         >>> p = Products([{'title':'Book title', 'rating': '4.2',\
-'review_nb': '15', 'url':'http://www.amazon.com/book'}])
+'review_nb': '15', 'price' : '$2.99', 'url':'http://www.amazon.com/book'}])
         >>> p.csv()
-        'Product title,Rating,Number of customer reviews,\
-Product URL\\n"Book title",4.2,15,http://www.amazon.com/book'
+        'Product title,Rating,Number of customer reviews,Price indication,\
+Product URL\\n"Book title",4.2,15,$2.99,http://www.amazon.com/book'
 
         >>> print(p.csv(separator=";"))
-        Product title;Rating;Number of customer reviews;Product URL
-        "Book title";4,2;15;http://www.amazon.com/book
+        Product title;Rating;Number of customer reviews;Price indication;Product URL
+        "Book title";4,2;15;$2.99;http://www.amazon.com/book
 
         >>> p2 = Products()
         >>> p2.csv()
-        'Product title,Rating,Number of customer reviews,Product URL'
+        'Product title,Rating,Number of customer reviews, Price indication,Product URL'
         """
         csv_string = separator.join([
                                     "Product title",
                                     "Rating",
                                     "Number of customer reviews",
+                                    "Price indication",
                                     "Product URL"])
         for product in self:
             rating = product.rating
@@ -72,6 +73,7 @@ Product URL\\n"Book title",4.2,15,http://www.amazon.com/book'
                                         '"'+product.title+'"',
                                         rating,
                                         product.review_nb,
+                                        product.price,
                                         product.url]))
         return csv_string
 
