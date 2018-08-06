@@ -56,7 +56,7 @@ Product URL\\n"Book title",4.2,15,$2.99,http://www.amazon.com/book'
 
         >>> p2 = Products()
         >>> p2.csv()
-        'Product title,Rating,Number of customer reviews, Price indication,Product URL'
+        'Product title,Rating,Number of customer reviews,Price indication,Product URL'
         """
         type_list = []
         for product in self:
