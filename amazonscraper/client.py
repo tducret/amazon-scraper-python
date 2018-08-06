@@ -331,7 +331,7 @@ class Client(object):
                     self.base_url,
                     url_next_page_soup[0].get('href'))
                 self._get_products(search_url=url_next_page,
-                                   max_product_nb=max_product_nb)
+                                   max_product_nb=max_product_nb, price = price)
         return self.product_dict_list
 
 

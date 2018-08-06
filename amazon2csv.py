@@ -52,7 +52,7 @@ def main(keywords, url, csvseparator, maxproductnb, price, outputhtml):
                                     keywords=keywords,
                                     search_url=url,
                                     max_product_nb=maxproductnb,
-                                    price=price)
+                                    price = price)
 
     print(products.csv(separator=csvseparator))
 
