@@ -60,7 +60,7 @@ Product URL\\n"Book title",4.2,15,$2.99,http://www.amazon.com/book'
         """
         type_list = []
         for product in self:
-            for x in product.price.keys():
+            for x in product.price:
                 if x in type_list: continue
                 else :
                     type_list.append(x)

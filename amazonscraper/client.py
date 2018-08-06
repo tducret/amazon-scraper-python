@@ -188,7 +188,7 @@ class Client(object):
         action_locations = [all_tags.index(x) for x in action_tag]
 
         price_tag = product.select(css_selector_dict['price']['price_selector'])
-        price_text = [x.get_text() for x in price_tag]
+        price_text = [x.get_text().replace(",", ".") for x in price_tag]
         price_locations = [all_tags.index(x) for x in price_tag]
 
         for t in type_text:
@@ -228,9 +228,9 @@ class Client(object):
             if len(prices) ==0:
                 price_dict[product_type] = {'to rent' : 'N/A', 'to buy': 'N/A'}
             elif len(action_type) == 0:
-                price_dict[product_type] = {'to rent' : 'N/A', 'to buy': prices[0].get_text()}
+                price_dict[product_type] = {'to rent' : 'N/A', 'to buy': prices[0].get_text().replace(",", ".")}
             elif len(action_type) == 2:
-                price_dict[product_type] = {'to rent': prices[0].get_text(), 'to buy': prices[1].get_text()}
+                price_dict[product_type] = {'to rent': prices[0].get_text().replace(",", "."), 'to buy': prices[1].get_text().replace(",", ".")}
         except IndexError: pass
         return(price_dict)
 
