@@ -58,23 +58,42 @@ Product URL\\n"Book title",4.2,15,$2.99,http://www.amazon.com/book'
         >>> p2.csv()
         'Product title,Rating,Number of customer reviews, Price indication,Product URL'
         """
-        csv_string = separator.join([
-                                    "Product title",
-                                    "Rating",
-                                    "Number of customer reviews",
-                                    "Price indication",
-                                    "Product URL"])
+        type_list = []
+        for product in self:
+            for x in product.price.keys():
+                if x in type_list: continue
+                else :
+                    type_list.append(x)
+        try:
+            type_list[0]
+        except IndexError:
+            print('Scrapping error: nothing was scrapped please try again')
+        to_join = [
+                "Product title",
+                "Rating",
+                "Number of customer reviews",
+                "Product URL"]
+        for x in type_list:
+            to_join.append(x + '-to rent')
+            to_join.append(x + '-to buy')
+        csv_string = separator.join(to_join)
         for product in self:
             rating = product.rating
             if separator == ";":  # French convention
                 rating = rating.replace(".", ",")
-            csv_string += ("\n"+separator.join([
-                                        # Add the doublequotes " for titles
-                                        '"'+product.title+'"',
-                                        rating,
-                                        product.review_nb,
-                                        product.price,
-                                        product.url]))
+            final_string = [# Add the doublequotes " for titles
+                    '"'+product.title+'"',
+                    rating,
+                    product.review_nb,
+                    product.url]
+            for x in type_list:
+                if x in product.price:
+                    final_string.append(product.price[x]['to rent'])
+                    final_string.append(product.price[x]['to buy'])
+                else:
+                    final_string.append('N/A')
+                    final_string.append('N/A')
+            csv_string += ("\n"+separator.join(final_string))
         return csv_string
 
 
@@ -89,13 +108,14 @@ class Product(object):
         return self.product.get(attr, "")
 
 
-def search(keywords="", search_url="", max_product_nb=100):
+def search(keywords="", search_url="", max_product_nb=100, price=True):
     """Function to get the list of products from amazon"""
     amz = Client()
     product_dict_list = amz._get_products(
         keywords=keywords,
         search_url=search_url,
-        max_product_nb=max_product_nb)
+        max_product_nb=max_product_nb,
+        price = price)
     products = Products(product_dict_list)
     products.last_html_page = amz.last_html_page
 

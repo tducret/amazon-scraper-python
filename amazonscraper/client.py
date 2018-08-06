@@ -30,7 +30,12 @@ _CSS_SELECTORS_MOBILE = {
                div.a-icon-row.a-size-small > i > span",
     "review_nb": "a > div > div.sx-table-detail > \
                   div.a-icon-row.a-size-small > span",
-    "price" : "div.a-row > span.a-color-price", 
+    'identification' : 'M',
+    "price" : {
+    'type_selector' : 'span[class="a-color-base"]',
+    'action_selector' : 'span[class="a-color-secondary"]',
+    'price_selector' : 'span.a-size-small.a-color-price.a-text-bold'
+    },
     "url": "a['href']",
     "next_page_url": "ul.a-pagination > li.a-last > a['href']",
 }
@@ -40,9 +45,14 @@ _CSS_SELECTORS_MOBILE_GRID = {
     "title": "a > div > h5.sx-title > span",
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
     "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
-    "price" : "div.a-section > span.a-color-price", 
+    'identification' : 'MG',
+    "price" : {
+    'type_selector' : 'span[class="a-color-base"]',
+    'action_selector' : 'span[class="a-color-secondary"]',
+    'price_selector' : 'span.a-size-small.a-color-price.a-text-bold'
+    },
     "url": "a['href']",
-    "next_page_url": "ul.a-pagination > li.a-last > a['href']",
+    "next_page_url": "ul.a-pagination > li.a-last > a['href']"
 }
 _CSS_SELECTORS_DESKTOP = {
     "product": "ul > li.s-result-item > div.s-item-container",
@@ -51,7 +61,12 @@ _CSS_SELECTORS_DESKTOP = {
     "review_nb": "div.a-column.a-span5.a-span-last > \
                 div.a-row.a-spacing-mini > \
                 a.a-size-small.a-link-normal.a-text-normal",
-    "price" : "a.a-link-normal > span.a-offscreen", 
+    'identification' : 'D',
+    "price" : {
+    'type_selector' : 'h3[class="a-size-small s-inline a-text-normal"]',
+    'action_selector' : 'span[class="a-size-base a-color-secondary"]',
+    'price_selector' : 'a > span[class="a-offscreen"]'
+    },
     "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a['href']",
     "next_page_url": "a#pagnNextLink",
 }
@@ -60,7 +75,12 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "title": "div div.sg-row  h5 > span",
     "rating": "div div.sg-row .a-spacing-top-mini i span",
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
-    "price" : "a.a-link-normal > span.a-offscreen",
+    'identification' : 'D2',
+    "price" : {
+    'type_selector' : 'h3[class="a-size-small s-inline a-text-normal"]',
+    'action_selector' : 'span[class="a-size-base a-color-secondary"]',
+    'price_selector' : 'a > span[class="a-offscreen"]'
+    },
     "url": "div div.sg-col-8-of-12 a.a-link-normal",
     "next_page_url": "li.a-last",
 }
@@ -157,11 +177,74 @@ class Client(object):
             valid_page = True
         return valid_page
 
-    def _get_products(self, keywords="", search_url="", max_product_nb=100):
+    def _get_price_dict_D(self, product, css_selector_dict):
+        price_dict = {}
+        all_tags = product.find_all(True)
+        type_tag = product.select(css_selector_dict['price']['type_selector'])
+        type_text = [x.get_text() for x in type_tag]
+
+        action_tag = product.select(css_selector_dict['price']['action_selector'])
+        action_text = [x.get_text() for x in action_tag]
+        action_locations = [all_tags.index(x) for x in action_tag]
+
+        price_tag = product.select(css_selector_dict['price']['price_selector'])
+        price_text = [x.get_text() for x in price_tag]
+        price_locations = [all_tags.index(x) for x in price_tag]
+
+        for t in type_text:
+            price_dict[t] = {'to rent' : 'N/A', 'to buy': 'N/A'}
+        if len(action_text)==0:
+            for i, t in enumerate(type_text):
+                price_dict[t]['to rent'] = 'N/A'
+                price_dict[t]['to buy'] = price_text[i]
+        elif (len(action_text)==1) and (len(type_text)==1):
+            price_dict[t]['to rent'] = price_text[0]
+            price_dict[t]['to buy'] = price_text[1]
+        elif (len(action_text)==1) and (len(type_text)==2):
+            threshold = action_locations[0]
+            if threshold > max(price_locations):
+                price_dict[type_text[0]]['to rent'] = 'N/A'
+                price_dict[type_text[0]]['to buy'] = price_text[0]
+                price_dict[type_text[1]]['to rent'] = price_text[1]
+                price_dict[type_text[1]]['to buy'] = price_text[2]
+            else:
+                price_dict[type_text[0]]['to rent'] = price_text[0]
+                price_dict[type_text[0]]['to buy'] = price_text[1]
+                price_dict[type_text[1]]['to rent'] = 'N/A'
+                price_dict[type_text[1]]['to buy'] = price_text[2]
+        elif (len(action_text)==2) and (len(type_text)==2):
+            for i, t in enumerate(type_text):
+                j = 2*i
+                price_dict[t]['to rent'] = price_text[j]
+                price_dict[t]['to buy'] = price_text[j+1]
+        return(price_dict)
+
+    def _get_price_dict_MG(self, product, css_selector_dict):
+        price_dict = {}
+        try :
+            product_type = product.select(css_selector_dict['price']['type_selector'])[0].get_text()
+            action_type = product.select(css_selector_dict['price']['action_selector'])
+            prices = product.select(css_selector_dict['price']['price_selector'])
+            if len(prices) ==0:
+                price_dict[product_type] = {'to rent' : 'N/A', 'to buy': 'N/A'}
+            elif len(action_type) == 0:
+                price_dict[product_type] = {'to rent' : 'N/A', 'to buy': prices[0].get_text()}
+            elif len(action_type) == 2:
+                price_dict[product_type] = {'to rent': prices[0].get_text(), 'to buy': prices[1].get_text()}
+        except IndexError: pass
+        return(price_dict)
+
+    def _get_price(self, product, css_selector_dict, identification):
+        if identification in {'MG', 'M'}:
+            return(self._get_price_dict_MG(product, css_selector_dict))
+        else:
+            return(self._get_price_dict_D(product, css_selector_dict))
+
+    def _get_products(self, keywords="", search_url="", max_product_nb=100, price = True):
+        #funtion to retrieve the different prices
         if search_url == "":
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
-
         trials = 0
         while trials < _MAX_TRIAL_REQUESTS:
             trials += 1
@@ -191,9 +274,10 @@ class Client(object):
             products = soup.select(css_selector)
             if len(products) >= 1:
                 break
-
         # For each product of the result page
         for product in products:
+            #determines which kind of html page it is
+            identification = css_selector_dict['identification']
             if len(self.product_dict_list) >= max_product_nb:
                 # Check if the maximum number to search has been reached
                 break
@@ -221,15 +305,11 @@ class Client(object):
                     # Remove the comma for thousands (2,921 => 2921)
                     proper_review_nb = proper_review_nb.replace(",", "")
                     product_dict['review_nb'] = proper_review_nb
-                #checks if the price has a good form otherwise returns a N/A
-                price = title = _css_select(product,
-                                    css_selector_dict.get("price", ""))
-                product_dict['price'] = price.replace(",", ".")
-                try:
-                    float(price[1:])
-                    product_dict['price'] = price
-                except ValueError:
-                    product_dict['price'] = 'N/A'
+
+                #gets the price dictionnary depending on the page's type
+                if price:
+                    product_dict['price'] = self._get_price(product, css_selector_dict, identification)
+                else: product_dict['price'] = {}
                 css_selector = css_selector_dict.get("url", "")
                 url_product_soup = product.select(css_selector)
                 if url_product_soup:
@@ -252,7 +332,6 @@ class Client(object):
                     url_next_page_soup[0].get('href'))
                 self._get_products(search_url=url_next_page,
                                    max_product_nb=max_product_nb)
-
         return self.product_dict_list
 
 

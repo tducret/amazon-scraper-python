@@ -30,6 +30,12 @@ https://www.amazon.com/s/field-keywords=python%2Bscraping',
     help='Maximum number of products (ex : 100)',
     default="100",
 )
+@click.option(
+    '--price', '-p',
+    type=bool,
+    help='display the different prices of the products',
+    default=True,
+)
 @click.version_option(
     version=amazonscraper.__version__,
     message='%(prog)s, based on amazonscraper module version %(version)s'
@@ -40,12 +46,13 @@ https://www.amazon.com/s/field-keywords=python%2Bscraping',
     help='Save the html page to the current folder with the specified name',
     default="",
 )
-def main(keywords, url, csvseparator, maxproductnb, outputhtml):
+def main(keywords, url, csvseparator, maxproductnb, price, outputhtml):
     """ Search for products on Amazon, and extract it as CSV """
     products = amazonscraper.search(
                                     keywords=keywords,
                                     search_url=url,
-                                    max_product_nb=maxproductnb)
+                                    max_product_nb=maxproductnb,
+                                    price=price)
 
     print(products.csv(separator=csvseparator))
 
