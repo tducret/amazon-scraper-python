@@ -88,6 +88,7 @@ title               | Product title
 rating      	    | Rating of the products (number between 0 and 5, False if missing)
 review_nb	        | Number of customer reviews (False if missing)
 url 				| Product URL
+asin 				| Product ASIN
 
 --------------
 
