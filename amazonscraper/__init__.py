@@ -5,7 +5,7 @@ useful information (title, ratings, number of reviews).
 from builtins import object
 from amazonscraper.client import Client
 
-__version__ = '0.0.9'  # Should be the same in setup.py
+__version__ = '0.1.0'  # Should be the same in setup.py
 
 
 class Products(object):

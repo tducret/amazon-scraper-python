@@ -90,7 +90,7 @@ title               | Product title
 rating      	    | Rating of the products (number between 0 and 5, False if missing)
 review_nb	        | Number of customer reviews (False if missing)
 url 				| Product URL
-asin 				| Product ASIN
+asin 				| Product ASIN ([Amazon Standard Identification Number](https://fr.wikipedia.org/wiki/Amazon_Standard_Identification_Number))
 
 --------------
 
