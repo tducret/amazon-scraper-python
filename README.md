@@ -35,9 +35,9 @@ amazon2csv.py --keywords="Python programming" --maxproductnb=2
 ```
 
 ```csv
-Product title,Rating,Number of customer reviews,Product URL
-"Python Crash Course: A Hands-On, Project-Based Introduction to Programming",4.5,309,https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036
-"A Smarter Way to Learn Python: Learn it faster. Remember it longer.",4.8,144,https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B
+Product title,Rating,Number of customer reviews,Product URL,ASIN
+"Python Crash Course: A Hands-On, Project-Based Introduction to Programming",4.5,357,https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036,1593276036
+"A Smarter Way to Learn Python: Learn it faster. Remember it longer.",4.7,358,https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B,B077Z55G3B
 ```
 
 You can also pass a search url (if you added complex filters for example), and save it to a file :
@@ -65,7 +65,8 @@ import amazonscraper
 results = amazonscraper.search("Python programming")
 
 for result in results:
-    print("%s (%s out of 5 stars, %s customer reviews) :  %s" % (result.title, result.rating, result.review_nb, result.url))
+    print("{} [ASIN = {}] ({} out of 5 stars, {} customer reviews) :  {}".format(
+    	result.title, result.asin, result.rating, result.review_nb, result.url))
 
 print("Number of results : %d" % (len(results)))
 
@@ -74,10 +75,11 @@ print("Number of results : %d" % (len(results)))
 Which will output :
 
 ```
-Learning Python, 5th Edition (4.0 out of 5 stars, 293 customer reviews) : https://www.amazon.com/Learning-Python-5th-Mark-Lutz/dp/1449355730
-Fluent Python: Clear, Concise, and Effective Programming (4.6 out of 5 stars, 87 customer reviews) : https://www.amazon.com/Fluent-Python-Concise-Effective-Programming/dp/1491946008
+Python Crash Course: A Hands-On, Project-Based Introduction to Programming [ASIN = 1593276036] (4.5 out of 5 stars, 357 customer reviews) :  https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036
+A Smarter Way to Learn Python: Learn it faster. Remember it longer. [ASIN = B077Z55G3B] (4.7 out of 5 stars, 358 customer reviews) :  https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B
+Learning Python, 5th Edition [ASIN = 1449355730] (4 out of 5 stars, 315 customer reviews) :  https://www.amazon.com/Learning-Python-5th-Mark-Lutz/dp/1449355730
 [...]
-Number of results : 3000
+Number of results : 100
 ```
 
 ### Attributes of the `Product` object

@@ -45,24 +45,25 @@ class Products(object):
     def csv(self, separator=","):
         """ Returns a CSV string with the product info
         >>> p = Products([{'title':'Book title', 'rating': '4.2',\
-'review_nb': '15', 'url':'http://www.amazon.com/book'}])
+'review_nb': '15', 'url':'http://www.amazon.com/book', 'asin':'A12345'}])
         >>> p.csv()
         'Product title,Rating,Number of customer reviews,\
-Product URL\\n"Book title",4.2,15,http://www.amazon.com/book'
+Product URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,A12345'
 
         >>> print(p.csv(separator=";"))
-        Product title;Rating;Number of customer reviews;Product URL
-        "Book title";4,2;15;http://www.amazon.com/book
+        Product title;Rating;Number of customer reviews;Product URL;ASIN
+        "Book title";4,2;15;http://www.amazon.com/book;A12345
 
         >>> p2 = Products()
         >>> p2.csv()
-        'Product title,Rating,Number of customer reviews,Product URL'
+        'Product title,Rating,Number of customer reviews,Product URL,ASIN'
         """
         csv_string = separator.join([
                                     "Product title",
                                     "Rating",
                                     "Number of customer reviews",
-                                    "Product URL"])
+                                    "Product URL",
+                                    "ASIN"])
         for product in self:
             rating = product.rating
             if separator == ";":  # French convention
@@ -72,7 +73,8 @@ Product URL\\n"Book title",4.2,15,http://www.amazon.com/book'
                                         '"'+product.title+'"',
                                         rating,
                                         product.review_nb,
-                                        product.url]))
+                                        product.url,
+                                        product.asin]))
         return csv_string
 
 
