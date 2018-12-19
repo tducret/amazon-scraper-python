@@ -226,6 +226,11 @@ class Client(object):
                         url_product_soup[0].get('href'))
                     proper_url = url.split("/ref=")[0]
                     product_dict['url'] = proper_url
+
+                    url_token = proper_url.split("/")
+                    asin = url_token[len(url_token)-1]
+                    product_dict['asin'] = asin
+
                     if "slredirect" not in proper_url:  # slredirect = bad url
                         self.product_dict_list.append(product_dict)
 

@@ -13,7 +13,8 @@ def test_amazonscraper_get_products_with_keywords():
 
 
 def test_amazonscraper_get_products_with_url():
-    url = "https://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=python"
+    url = "https://www.amazon.com/s/\
+ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=python"
     products = amazonscraper.search(
                                 search_url=url,
                                 max_product_nb=_MAX_PRODUCT_NB)
@@ -26,6 +27,7 @@ def test_amazonscraper_get_products_with_url():
     assert product.review_nb != ""
     assert product.rating != ""
     assert product.url != ""
+    assert product.asin != ""
 
 
 def test_amazonscraper_get_100_products():
@@ -42,5 +44,5 @@ def test_amazonscraper_csv_header():
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=1)
-    assert "Product title,Rating,Number of customer reviews,Product URL\n" \
-        in str(products.csv())
+    assert "Product title,Rating,Number of customer reviews,Product URL,\
+ASIN\n" in str(products.csv())
