@@ -40,6 +40,7 @@ def test_amazonscraper_invalid_url():
 
 
 def test_amazonscraper_sign_in_suggestion():
+    # or https://www.amazon.com/ref=assoc_res_sw_logo
     url = "https://www.amazon.com/gp/aw/ref=mw_access"
     products = amazonscraper.search(
                                 search_url=url,
