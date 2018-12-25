@@ -177,74 +177,75 @@ class Client(object):
                 self._change_user_agent()
                 time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
 
-        self.last_html_page = res.text
-        soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
+        if valid_page:
+            self.last_html_page = res.text
+            soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
-        selector = 0
-        for css_selector_dict in _CSS_SELECTOR_LIST:
-            selector += 1
-            css_selector = css_selector_dict.get("product", "")
-            products = soup.select(css_selector)
-            if len(products) >= 1:
-                break
+            selector = 0
+            for css_selector_dict in _CSS_SELECTOR_LIST:
+                selector += 1
+                css_selector = css_selector_dict.get("product", "")
+                products = soup.select(css_selector)
+                if len(products) >= 1:
+                    break
 
-        # For each product of the result page
-        for product in products:
-            if len(self.product_dict_list) >= max_product_nb:
-                # Check if the maximum number to search has been reached
-                break
-            else:
-                product_dict = {}
-                title = _css_select(product,
-                                    css_selector_dict.get("title", ""))
-                product_dict['title'] = title
-                rating = _css_select(product,
-                                     css_selector_dict.get("rating", ""))
-                review_nb = _css_select(product,
-                                        css_selector_dict.get("review_nb", ""))
-                if rating != "":
-                    proper_rating = rating.split(" ")[0].strip()
-                    # In French results, ratings with comma
-                    # Replace it with a dot (3,5 => 3.5)
-                    proper_rating = proper_rating.replace(",", ".")
-                    product_dict['rating'] = proper_rating
-                if review_nb != "":
-                    if len(review_nb.split("(")) > 1:
-                        proper_review_nb = review_nb.split("(")[1].\
-                                           split(")")[0]
-                    else:
-                        proper_review_nb = review_nb
-                    # Remove the comma for thousands (2,921 => 2921)
-                    proper_review_nb = proper_review_nb.replace(",", "")
-                    product_dict['review_nb'] = proper_review_nb
+            # For each product of the result page
+            for product in products:
+                if len(self.product_dict_list) >= max_product_nb:
+                    # Check if the maximum number to search has been reached
+                    break
+                else:
+                    product_dict = {}
+                    title = _css_select(product,
+                                        css_selector_dict.get("title", ""))
+                    product_dict['title'] = title
+                    rating = _css_select(product,
+                                        css_selector_dict.get("rating", ""))
+                    review_nb = _css_select(product,
+                                            css_selector_dict.get("review_nb", ""))
+                    if rating != "":
+                        proper_rating = rating.split(" ")[0].strip()
+                        # In French results, ratings with comma
+                        # Replace it with a dot (3,5 => 3.5)
+                        proper_rating = proper_rating.replace(",", ".")
+                        product_dict['rating'] = proper_rating
+                    if review_nb != "":
+                        if len(review_nb.split("(")) > 1:
+                            proper_review_nb = review_nb.split("(")[1].\
+                                            split(")")[0]
+                        else:
+                            proper_review_nb = review_nb
+                        # Remove the comma for thousands (2,921 => 2921)
+                        proper_review_nb = proper_review_nb.replace(",", "")
+                        product_dict['review_nb'] = proper_review_nb
 
-                css_selector = css_selector_dict.get("url", "")
-                url_product_soup = product.select(css_selector)
-                if url_product_soup:
-                    url = urljoin(
+                    css_selector = css_selector_dict.get("url", "")
+                    url_product_soup = product.select(css_selector)
+                    if url_product_soup:
+                        url = urljoin(
+                            self.base_url,
+                            url_product_soup[0].get('href'))
+                        proper_url = url.split("/ref=")[0]
+                        product_dict['url'] = proper_url
+
+                        url_token = proper_url.split("/")
+                        asin = url_token[len(url_token)-1]
+                        product_dict['asin'] = asin
+
+                        if "slredirect" not in proper_url:  # slredirect = bad url
+                            self.product_dict_list.append(product_dict)
+
+            if len(self.product_dict_list) < max_product_nb:
+                # Check if there is another page
+                # only if we have not already reached the max number of products
+                css_selector = css_selector_dict.get("next_page_url", "")
+                url_next_page_soup = soup.select(css_selector)
+                if url_next_page_soup:
+                    url_next_page = urljoin(
                         self.base_url,
-                        url_product_soup[0].get('href'))
-                    proper_url = url.split("/ref=")[0]
-                    product_dict['url'] = proper_url
-
-                    url_token = proper_url.split("/")
-                    asin = url_token[len(url_token)-1]
-                    product_dict['asin'] = asin
-
-                    if "slredirect" not in proper_url:  # slredirect = bad url
-                        self.product_dict_list.append(product_dict)
-
-        if len(self.product_dict_list) < max_product_nb:
-            # Check if there is another page
-            # only if we have not already reached the max number of products
-            css_selector = css_selector_dict.get("next_page_url", "")
-            url_next_page_soup = soup.select(css_selector)
-            if url_next_page_soup:
-                url_next_page = urljoin(
-                    self.base_url,
-                    url_next_page_soup[0].get('href'))
-                self._get_products(search_url=url_next_page,
-                                   max_product_nb=max_product_nb)
+                        url_next_page_soup[0].get('href'))
+                    self._get_products(search_url=url_next_page,
+                                    max_product_nb=max_product_nb)
 
         return self.product_dict_list
 
