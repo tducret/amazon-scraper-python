@@ -39,9 +39,19 @@ def test_amazonscraper_invalid_url():
                             max_product_nb=_MAX_PRODUCT_NB)
 
 
-def test_amazonscraper_sign_in_suggestion():
+def test_amazonscraper_sign_in_suggestion_url():
     # or https://www.amazon.com/ref=assoc_res_sw_logo
     url = "https://www.amazon.com/gp/aw/ref=mw_access"
+    products = amazonscraper.search(
+                                search_url=url,
+                                max_product_nb=_MAX_PRODUCT_NB)
+    assert len(products) == 0
+
+
+def test_amazonscraper_not_satisfied_url():
+    # todo: replace sdolenc with tducret after merge
+    url = "https://raw.githack.com/sdolenc/\
+amazon-scraper-python/urltests/test/not_satisfied.html"
     products = amazonscraper.search(
                                 search_url=url,
                                 max_product_nb=_MAX_PRODUCT_NB)
