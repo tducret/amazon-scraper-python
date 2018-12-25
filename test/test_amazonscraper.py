@@ -1,4 +1,5 @@
 import amazonscraper
+import pytest
 
 _MAX_PRODUCT_NB = 10
 
@@ -28,6 +29,22 @@ ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=python"
     assert product.rating != ""
     assert product.url != ""
     assert product.asin != ""
+
+
+def test_amazonscraper_invalid_url():
+    url = "https://0.0.0.0"
+    with pytest.raises(Exception):
+        amazonscraper.search(
+                            search_url=url,
+                            max_product_nb=_MAX_PRODUCT_NB)
+
+
+def test_amazonscraper_sign_in_suggestion():
+    url = "https://www.amazon.com/gp/aw/ref=mw_access"
+    products = amazonscraper.search(
+                                search_url=url,
+                                max_product_nb=_MAX_PRODUCT_NB)
+    assert len(products) == 0
 
 
 def test_amazonscraper_get_100_products():
