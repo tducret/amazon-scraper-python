@@ -58,6 +58,16 @@ amazon-scraper-python/urltests/test/not_satisfied.html"
     assert len(products) == 0
 
 
+def test_amazonscraper_404_url():
+    # todo: replace sdolenc with tducret after merge
+    url = "https://raw.githack.com/sdolenc/\
+amazon-scraper-python/urltests/test/404.html"
+    with pytest.raises(Exception):
+        amazonscraper.search(
+                            search_url=url,
+                            max_product_nb=_MAX_PRODUCT_NB)
+
+
 def test_amazonscraper_get_100_products():
 
     products = amazonscraper.search(
