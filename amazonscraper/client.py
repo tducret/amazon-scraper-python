@@ -177,8 +177,9 @@ class Client(object):
                 self._change_user_agent()
                 time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
 
+        self.last_html_page = res.text
+
         if valid_page:
-            self.last_html_page = res.text
             soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
             selector = 0
