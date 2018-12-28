@@ -211,11 +211,11 @@ class Client(object):
                         proper_rating = proper_rating.replace(",", ".")
                         product_dict['rating'] = proper_rating
                     if review_nb != "":
+                        proper_review_nb = review_nb
                         if len(review_nb.split("(")) > 1:
                             proper_review_nb = review_nb.split("(")[1].\
                                             split(")")[0]
-                        else:
-                            proper_review_nb = review_nb
+
                         # Remove the comma for thousands (2,921 => 2921)
                         proper_review_nb = proper_review_nb.replace(",", "")
                         product_dict['review_nb'] = proper_review_nb
@@ -255,11 +255,8 @@ def _css_select(soup, css_selector):
         """ Returns the content of the element pointed by the CSS selector,
         or an empty string if not found """
         selection = soup.select(css_selector)
+        retour = ""
         if len(selection) > 0:
             if hasattr(selection[0], 'text'):
                 retour = selection[0].text.strip()
-            else:
-                retour = ""
-        else:
-            retour = ""
         return retour
