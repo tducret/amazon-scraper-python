@@ -30,8 +30,8 @@ _CSS_SELECTORS_MOBILE = {
                div.a-icon-row.a-size-small > i > span",
     "review_nb": "a > div > div.sx-table-detail > \
                   div.a-icon-row.a-size-small > span",
-    "url": "a['href']",
-    "next_page_url": "ul.a-pagination > li.a-last > a['href']",
+    "url": "a[href]",
+    "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 # Sometimes, the result page is displayed with another layout
 _CSS_SELECTORS_MOBILE_GRID = {
@@ -39,8 +39,8 @@ _CSS_SELECTORS_MOBILE_GRID = {
     "title": "a > div > h5.sx-title > span",
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
     "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
-    "url": "a['href']",
-    "next_page_url": "ul.a-pagination > li.a-last > a['href']",
+    "url": "a[href]",
+    "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 _CSS_SELECTORS_DESKTOP = {
     "product": "ul > li.s-result-item > div.s-item-container",
@@ -49,7 +49,7 @@ _CSS_SELECTORS_DESKTOP = {
     "review_nb": "div.a-column.a-span5.a-span-last > \
                 div.a-row.a-spacing-mini > \
                 a.a-size-small.a-link-normal.a-text-normal",
-    "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a['href']",
+    "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a[href]",
     "next_page_url": "a#pagnNextLink",
 }
 _CSS_SELECTORS_DESKTOP_2 = {
