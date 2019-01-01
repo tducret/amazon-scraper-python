@@ -159,6 +159,8 @@ class Client(object):
         self._update_headers(search_url)
 
         trials = 0
+        res = None
+
         while trials < _MAX_TRIAL_REQUESTS:
             trials += 1
             try:
@@ -177,7 +179,10 @@ class Client(object):
                 self._change_user_agent()
                 time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
 
-        self.last_html_page = res.text
+        if res is not None:
+            self.last_html_page = res.text
+        else:
+            self.last_html_page = "Not any good page saved :("
 
         if valid_page:
             soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
@@ -201,9 +206,10 @@ class Client(object):
                                         css_selector_dict.get("title", ""))
                     product_dict['title'] = title
                     rating = _css_select(product,
-                                        css_selector_dict.get("rating", ""))
+                                         css_selector_dict.get("rating", ""))
                     review_nb = _css_select(product,
-                                            css_selector_dict.get("review_nb", ""))
+                                            css_selector_dict.get(
+                                                "review_nb", ""))
                     if rating != "":
                         proper_rating = rating.split(" ")[0].strip()
                         # In French results, ratings with comma

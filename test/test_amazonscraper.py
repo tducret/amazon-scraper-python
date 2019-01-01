@@ -5,7 +5,6 @@ _MAX_PRODUCT_NB = 10
 
 
 def test_amazonscraper_get_products_with_keywords():
-
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=_MAX_PRODUCT_NB)
@@ -49,9 +48,8 @@ def test_amazonscraper_sign_in_suggestion_url():
 
 
 def test_amazonscraper_not_satisfied_url():
-    # todo: replace sdolenc with tducret after merge
-    url = "https://raw.githack.com/sdolenc/\
-amazon-scraper-python/urltests/test/not_satisfied.html"
+    url = "https://raw.githack.com/tducret/\
+amazon-scraper-python/master/test/not_satisfied.html"
     products = amazonscraper.search(
                                 search_url=url,
                                 max_product_nb=_MAX_PRODUCT_NB)
@@ -59,17 +57,15 @@ amazon-scraper-python/urltests/test/not_satisfied.html"
 
 
 def test_amazonscraper_404_url():
-    # todo: replace sdolenc with tducret after merge
-    url = "https://raw.githack.com/sdolenc/\
-amazon-scraper-python/urltests/test/404.html"
-    with pytest.raises(Exception):
-        amazonscraper.search(
-                            search_url=url,
-                            max_product_nb=_MAX_PRODUCT_NB)
+    url = "https://raw.githack.com/tducret/\
+amazon-scraper-python/master/test/404.html"
+    products = amazonscraper.search(
+                                search_url=url,
+                                max_product_nb=_MAX_PRODUCT_NB)
+    assert len(products) == 0
 
 
 def test_amazonscraper_get_100_products():
-
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=100)
@@ -78,7 +74,6 @@ def test_amazonscraper_get_100_products():
 
 
 def test_amazonscraper_csv_header():
-
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=1)
