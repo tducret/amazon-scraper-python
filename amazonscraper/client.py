@@ -31,6 +31,7 @@ _CSS_SELECTORS_MOBILE = {
     "review_nb": "a > div > div.sx-table-detail > \
                   div.a-icon-row.a-size-small > span",
     "url": "a[href]",
+    "img": "img[src]",
     "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 # Sometimes, the result page is displayed with another layout
@@ -40,6 +41,7 @@ _CSS_SELECTORS_MOBILE_GRID = {
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
     "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
     "url": "a[href]",
+    "img": "img[src]",
     "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 _CSS_SELECTORS_DESKTOP = {
@@ -50,6 +52,7 @@ _CSS_SELECTORS_DESKTOP = {
                 div.a-row.a-spacing-mini > \
                 a.a-size-small.a-link-normal.a-text-normal",
     "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a[href]",
+    "img": "div.a-column.a-span12.a-text-center > a.a-link-normal.a-text-normal > img[src]",
     "next_page_url": "a#pagnNextLink",
 }
 _CSS_SELECTORS_DESKTOP_2 = {
@@ -58,6 +61,7 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "rating": "div div.sg-row .a-spacing-top-mini i span",
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
     "url": "div div.sg-col-8-of-12 a.a-link-normal",
+    "img": "img[src]",
     "next_page_url": "li.a-last",
 }
 
@@ -226,6 +230,22 @@ class Client(object):
                         proper_review_nb = proper_review_nb.replace(",", "")
                         product_dict['review_nb'] = proper_review_nb
 
+                    # Get image before url and asin
+                    css_selector = css_selector_dict.get("img", "")
+                    img_product_soup = product.select(css_selector)
+                    if img_product_soup:
+                        img_url = img_product_soup[0].get('src')
+                        # Check if it is not a base64 formatted image
+                        if "data:image/webp" in img_url:
+                            img_url = img_product_soup[0].get(
+                                'data-search-image-source-set',
+                                '').split(' ')[0]
+
+                        if img_url != '':
+                            img_url = _get_high_res_img_url(img_url=img_url)
+
+                        product_dict['img'] = img_url
+
                     css_selector = css_selector_dict.get("url", "")
                     url_product_soup = product.select(css_selector)
                     if url_product_soup:
@@ -258,11 +278,28 @@ class Client(object):
 
 
 def _css_select(soup, css_selector):
-        """ Returns the content of the element pointed by the CSS selector,
-        or an empty string if not found """
-        selection = soup.select(css_selector)
-        retour = ""
-        if len(selection) > 0:
-            if hasattr(selection[0], 'text'):
-                retour = selection[0].text.strip()
-        return retour
+    """ Returns the content of the element pointed by the CSS selector,
+    or an empty string if not found """
+    selection = soup.select(css_selector)
+    retour = ""
+    if len(selection) > 0:
+        if hasattr(selection[0], 'text'):
+            retour = selection[0].text.strip()
+    return retour
+
+def _get_high_res_img_url(img_url):
+    """ Returns a modified url pointing to the high resolution version of
+    the image
+    >>> print(_get_high_res_img_url("https://images-na.ssl-images-amazon.com/\
+images/I/513gErH1dML._AC_SX236_SY340_FMwebp_QL65_.jpg"))
+    https://images-na.ssl-images-amazon.com/\
+images/I/513gErH1dML.jpg
+    >>> print(_get_high_res_img_url("https://images-na.ssl-images-amazon.com/\
+images/I/51F48HFHq6L._AC_SX118_SY170_QL70_.jpg"))
+    https://images-na.ssl-images-amazon.com/\
+images/I/51F48HFHq6L.jpg
+    """
+    high_res_url = img_url.split("._")[0] + ".jpg"
+    return high_res_url
+
+

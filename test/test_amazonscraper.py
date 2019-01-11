@@ -78,4 +78,4 @@ def test_amazonscraper_csv_header():
                                 keywords="Python",
                                 max_product_nb=1)
     assert "Product title,Rating,Number of customer reviews,Product URL,\
-ASIN\n" in str(products.csv())
+Image URL,ASIN\n" in str(products.csv())

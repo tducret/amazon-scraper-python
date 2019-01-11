@@ -5,7 +5,7 @@ useful information (title, ratings, number of reviews).
 from builtins import object
 from amazonscraper.client import Client
 
-__version__ = '0.1.1'  # Should be the same in setup.py
+__version__ = '0.1.2'  # Should be the same in setup.py
 
 
 class Products(object):
@@ -48,21 +48,22 @@ class Products(object):
 'review_nb': '15', 'url':'http://www.amazon.com/book', 'asin':'A12345'}])
         >>> p.csv()
         'Product title,Rating,Number of customer reviews,\
-Product URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,A12345'
+Product URL,Image URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,,A12345'
 
         >>> print(p.csv(separator=";"))
-        Product title;Rating;Number of customer reviews;Product URL;ASIN
-        "Book title";4,2;15;http://www.amazon.com/book;A12345
+        Product title;Rating;Number of customer reviews;Product URL;Image URL;ASIN
+        "Book title";4,2;15;http://www.amazon.com/book;;A12345
 
         >>> p2 = Products()
         >>> p2.csv()
-        'Product title,Rating,Number of customer reviews,Product URL,ASIN'
+        'Product title,Rating,Number of customer reviews,Product URL,Image URL,ASIN'
         """
         csv_string = separator.join([
                                     "Product title",
                                     "Rating",
                                     "Number of customer reviews",
                                     "Product URL",
+                                    "Image URL",
                                     "ASIN"])
         for product in self:
             rating = product.rating
@@ -74,6 +75,7 @@ Product URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,A12345'
                                         rating,
                                         product.review_nb,
                                         product.url,
+                                        product.img,
                                         product.asin]))
         return csv_string
 
