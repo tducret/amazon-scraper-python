@@ -35,9 +35,9 @@ amazon2csv.py --keywords="Python programming" --maxproductnb=2
 ```
 
 ```csv
-Product title,Rating,Number of customer reviews,Product URL,ASIN
-"Python Crash Course: A Hands-On, Project-Based Introduction to Programming",4.5,357,https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036,1593276036
-"A Smarter Way to Learn Python: Learn it faster. Remember it longer.",4.7,358,https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B,B077Z55G3B
+Product title,Rating,Number of customer reviews,Product URL,Image URL,ASIN
+"Python Crash Course: A Hands-On, Project-Based Introduction to Programming",4.5,370,https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036,https://images-na.ssl-images-amazon.com/images/I/51F48HFHq6L.jpg,1593276036
+"A Smarter Way to Learn Python: Learn it faster. Remember it longer.",4.7,384,https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B,https://images-na.ssl-images-amazon.com/images/I/51fNZfTUPXL.jpg,B077Z55G3
 ```
 
 You can also pass a search url (if you added complex filters for example), and save it to a file :
@@ -62,11 +62,15 @@ amazon2csv.py --help
 # -*- coding: utf-8 -*-
 import amazonscraper
 
-results = amazonscraper.search("Python programming")
+results = amazonscraper.search("Python programming", max_product_nb=2)
 
 for result in results:
-    print("{} [ASIN = {}] ({} out of 5 stars, {} customer reviews) :  {}".format(
-    	result.title, result.asin, result.rating, result.review_nb, result.url))
+    print("{}".format(result.title))
+    print("  - ASIN : {}".format(result.asin))
+    print("  - {} out of 5 stars, {} customer reviews".format(result.rating, result.review_nb))
+    print("  - {}".format(result.url))
+    print("  - Image : {}".format(result.img))
+    print()
 
 print("Number of results : %d" % (len(results)))
 
@@ -75,11 +79,19 @@ print("Number of results : %d" % (len(results)))
 Which will output :
 
 ```
-Python Crash Course: A Hands-On, Project-Based Introduction to Programming [ASIN = 1593276036] (4.5 out of 5 stars, 357 customer reviews) :  https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036
-A Smarter Way to Learn Python: Learn it faster. Remember it longer. [ASIN = B077Z55G3B] (4.7 out of 5 stars, 358 customer reviews) :  https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B
-Learning Python, 5th Edition [ASIN = 1449355730] (4 out of 5 stars, 315 customer reviews) :  https://www.amazon.com/Learning-Python-5th-Mark-Lutz/dp/1449355730
-[...]
-Number of results : 100
+Python Crash Course: A Hands-On, Project-Based Introduction to Programming
+  - ASIN : 1593276036
+  - 4.5 out of 5 stars, 370 customer reviews
+  - https://www.amazon.com/Python-Crash-Course-Hands-Project-Based/dp/1593276036
+  - Image : https://images-na.ssl-images-amazon.com/images/I/51F48HFHq6L.jpg
+
+A Smarter Way to Learn Python: Learn it faster. Remember it longer.
+  - ASIN : B077Z55G3B
+  - 4.7 out of 5 stars, 384 customer reviews
+  - https://www.amazon.com/Smarter-Way-Learn-Python-Remember-ebook/dp/B077Z55G3B
+  - Image : https://images-na.ssl-images-amazon.com/images/I/51fNZfTUPXL.jpg
+
+Number of results : 2
 ```
 
 ### Attributes of the `Product` object
@@ -90,6 +102,7 @@ title               | Product title
 rating      	    | Rating of the products (number between 0 and 5, False if missing)
 review_nb	        | Number of customer reviews (False if missing)
 url 				| Product URL
+img                 | Image URL
 asin 				| Product ASIN ([Amazon Standard Identification Number](https://fr.wikipedia.org/wiki/Amazon_Standard_Identification_Number))
 
 --------------
