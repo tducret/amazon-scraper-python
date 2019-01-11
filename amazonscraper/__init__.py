@@ -63,6 +63,7 @@ Product URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,A12345'
                                     "Rating",
                                     "Number of customer reviews",
                                     "Product URL",
+                                    "Image URL",
                                     "ASIN"])
         for product in self:
             rating = product.rating
@@ -74,6 +75,7 @@ Product URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,A12345'
                                         rating,
                                         product.review_nb,
                                         product.url,
+                                        product.img,
                                         product.asin]))
         return csv_string
 

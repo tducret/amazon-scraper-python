@@ -31,6 +31,7 @@ _CSS_SELECTORS_MOBILE = {
     "review_nb": "a > div > div.sx-table-detail > \
                   div.a-icon-row.a-size-small > span",
     "url": "a[href]",
+    "img": "img[src]",
     "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 # Sometimes, the result page is displayed with another layout
@@ -40,6 +41,7 @@ _CSS_SELECTORS_MOBILE_GRID = {
     "rating": "a > div > div.a-icon-row.a-size-mini > i > span",
     "review_nb": "a > div > div.a-icon-row.a-size-mini > span",
     "url": "a[href]",
+    "img": "img[src]",
     "next_page_url": "ul.a-pagination > li.a-last > a[href]",
 }
 _CSS_SELECTORS_DESKTOP = {
@@ -50,6 +52,7 @@ _CSS_SELECTORS_DESKTOP = {
                 div.a-row.a-spacing-mini > \
                 a.a-size-small.a-link-normal.a-text-normal",
     "url": "div.a-row.a-spacing-small > div.a-row.a-spacing-none > a[href]",
+    "img": "div.a-column.a-span12.a-text-center > a.a-link-normal.a-text-normal > img[src]",
     "next_page_url": "a#pagnNextLink",
 }
 _CSS_SELECTORS_DESKTOP_2 = {
@@ -58,6 +61,7 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "rating": "div div.sg-row .a-spacing-top-mini i span",
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
     "url": "div div.sg-col-8-of-12 a.a-link-normal",
+    "img": "img[src]",
     "next_page_url": "li.a-last",
 }
 
@@ -225,6 +229,16 @@ class Client(object):
                         # Remove the comma for thousands (2,921 => 2921)
                         proper_review_nb = proper_review_nb.replace(",", "")
                         product_dict['review_nb'] = proper_review_nb
+
+                    # Get image before url and asin
+                    css_selector = css_selector_dict.get("img", "")
+                    url_product_soup = product.select(css_selector)
+                    if url_product_soup:
+                        url = urljoin(
+                            self.base_url,
+                            url_product_soup[0].get('src'))
+                        proper_url = url.split("/ref=")[0]
+                        product_dict['img'] = proper_url
 
                     css_selector = css_selector_dict.get("url", "")
                     url_product_soup = product.select(css_selector)
