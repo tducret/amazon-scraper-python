@@ -267,7 +267,8 @@ class Client(object):
                             info = self._get(info_url)
                             soup_info = BeautifulSoup(info.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
                             price = soup_info.select('span.a-size-medium.a-color-price.sc-price')
-                            product_dict['price'] = price[0].getText()
+                            if price: # Doesn't work for ebooks
+                                product_dict['price'] = price[0].getText()
 
                             self.product_dict_list.append(product_dict)
 
