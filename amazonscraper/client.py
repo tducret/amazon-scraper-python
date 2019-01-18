@@ -260,6 +260,15 @@ class Client(object):
                         product_dict['asin'] = asin
 
                         if "slredirect" not in proper_url:  # slredirect = bad url
+                            # Get price using asin
+                            info_url = urljoin(
+                                self.base_url,
+                                f"gp/cart/desktop/ajax-mini-detail.html/ref=added_item_1?ie=UTF8&asin={asin}")
+                            info = self._get(info_url)
+                            soup_info = BeautifulSoup(info.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
+                            price = soup_info.select('span.a-size-medium.a-color-price.sc-price')
+                            product_dict['price'] = price[0].getText()
+
                             self.product_dict_list.append(product_dict)
 
             if len(self.product_dict_list) < max_product_nb:
@@ -301,5 +310,3 @@ images/I/51F48HFHq6L.jpg
     """
     high_res_url = img_url.split("._")[0] + ".jpg"
     return high_res_url
-
-
