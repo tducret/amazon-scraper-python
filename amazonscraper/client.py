@@ -62,7 +62,7 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
     "url": "div div.sg-col-8-of-12 a.a-link-normal",
     "img": "img[src]",
-    "next_page_url": "li.a-last",
+    "next_page_url": "li.a-last > a[href]",
 }
 
 _CSS_SELECTOR_LIST = [
@@ -141,9 +141,9 @@ class Client(object):
         """ Get the Amazon search URL, based on the keywords passed
         >>> c = Client()
         >>> print(c._get_search_url(keywords="python"))
-        https://www.amazon.com/s/field-keywords=python
+        https://www.amazon.com/s?k=python
         """
-        search_url = urljoin(_BASE_URL, ("s/field-keywords=%s" % (keywords)))
+        search_url = urljoin(_BASE_URL, ("s?k=%s" % (keywords)))
         return search_url
 
     def _check_page(self, html_content):
