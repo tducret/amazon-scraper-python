@@ -227,7 +227,11 @@ class Client(object):
 
     def _get_price(self, product):
         """Given the HTML for a particular `product`, extract the price"""
-        prices = re.findall(r'\$([\d,]*.\d\d)', str(product))
+
+        # match prices of the form $X,XXX.XX.
+        # Note the '<' at the end that distinguishes between list prices and per unit prices
+        # By using the minimum non-zero price, strikethrough prices are ignored
+        prices = re.findall(r'\$([\d,]*.\d\d)<', str(product))
 
         # convert strings to floats and sort
         prices = list(sorted(map(float, prices)))
@@ -242,6 +246,20 @@ class Client(object):
             print(f'  Failed to extract price!')
 
         return min(prices)
+
+
+    def _get_unit_price(self, product):
+        """Given the HTML for a particular `product`, extact the price per unit and the unit"""
+
+        unit_prices = re.findall(r'\(\$([\d,]*.\d\d)/(.*)?\)', str(product))
+
+        if len(unit_prices) == 0:
+            return float('nan'), None
+
+        if len(unit_prices) > 1:
+            print('Taking the first unit price found {}'.format(unit_prices))
+
+        return float(unit_prices[0][0]), unit_prices[0][1]
 
 
     def _get_products(self, keywords="", search_url="", max_product_nb=100):
@@ -310,6 +328,9 @@ class Client(object):
 
             # extract number of ratings
             product_dict['review_nb'] = self._get_n_ratings(product)
+
+            # extract unit price
+            product_dict['unit_price'], product_dict['unit'] =  self._get_unit_price(product)
 
             # Get image before url and asin
             css_selector = css_selector_dict.get("img", "")
