@@ -4,6 +4,7 @@ Module to get and parse the product info on Amazon
 """
 
 import requests
+import re
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import time
@@ -19,9 +20,10 @@ Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) \
 Chrome/67.0.3396.79 Safari/537.36'
 
 _USER_AGENT_LIST = [
-                    _DEFAULT_USER_AGENT,
-                    _CHROME_DESKTOP_USER_AGENT,
-                   ]
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0',
+    _DEFAULT_USER_AGENT,
+    _CHROME_DESKTOP_USER_AGENT,
+]
 
 _CSS_SELECTORS_MOBILE = {
     "product": "#resultItems > li",
@@ -153,11 +155,97 @@ class Client(object):
             valid_page = False
         elif "The request could not be satisfied." in html_content:
             valid_page = False
+        elif "Robot Check" in html_content:
+            valid_page = False
         else:
             valid_page = True
         return valid_page
 
+
+    def _get_n_ratings(self, product):
+        """Given the HTML for a particular `product`, extract the number of ratings"""
+
+        n_ratings_css_selectors = [
+            "div.a-row.a-size-small span.a-size-base",
+            "div div.sg-row .a-spacing-top-mini span.a-size-small",
+            "div.a-column.a-span5.a-span-last > div.a-row.a-spacing-mini > a.a-size-small.a-link-normal.a-text-normal",
+        ]
+
+        for selector in n_ratings_css_selectors:
+
+            n_ratings = _css_select(product, selector)
+
+            try:
+                n_ratings = int(n_ratings.replace(',', ''))
+                break
+            except ValueError:
+                pass
+
+        if not n_ratings:
+            print(f'  Failed to extract number of ratings!')
+
+        return n_ratings
+
+
+    def _get_title(self, product):
+        """Given the HTML for a particular `product`, extract the title"""
+
+        title_css_selectors = [
+            'h5 span',
+            "a.s-access-detail-page > h2",
+            "div div.sg-row  h5 > span"
+        ]
+
+        for selector in title_css_selectors:
+
+            title = _css_select(product, selector)
+
+            if title:
+                break
+
+        if not title:
+            print('  Failed to extract title!')
+
+        return title
+
+
+    def _get_rating(self, product):
+        """Given the HTML for a particular `product`, extract the average rating"""
+
+        rating = re.search(r'(\d.\d) out of 5', str(product))
+
+        if rating:
+            rating = rating.groups()[0]
+            # convert string to float and replace European decimal seperator ',' with '.'s
+            rating = float(rating.replace(",", "."))
+        else:
+            rating = float('nan')
+            print(f'  Failed to extract rating!')
+
+        return rating
+
+
+    def _get_price(self, product):
+        """Given the HTML for a particular `product`, extract the price"""
+        prices = re.findall(r'\$([\d,]*.\d\d)', str(product))
+
+        # convert strings to floats and sort
+        prices = list(sorted(map(float, prices)))
+
+        # sometimes a promotional price of zero dolars is returned
+        try:
+            prices.remove(0.0)
+        except ValueError:
+            pass
+
+        if not prices:
+            print(f'  Failed to extract price!')
+
+        return min(prices)
+
+
     def _get_products(self, keywords="", search_url="", max_product_nb=100):
+
         if search_url == "":
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
@@ -169,127 +257,136 @@ class Client(object):
             trials += 1
             try:
                 res = self._get(search_url)
+                # import pdb; pdb.set_trace()
                 valid_page = self._check_page(res.text)
+
+            # To counter the "SSLError bad handshake" exception
             except requests.exceptions.SSLError:
-                # To counter the "SSLError bad handshake" exception
                 valid_page = False
-                pass
+
             except ConnectionError:
                 valid_page = False
-                pass
+
             if valid_page:
-                    break
-            else:
-                self._change_user_agent()
-                time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
+                break
+
+            self._change_user_agent()
+            time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
 
         if res is not None:
             self.last_html_page = res.text
         else:
             self.last_html_page = "Not any good page saved :("
 
-        if valid_page:
-            soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
+        if not valid_page:
+            print('No valid pages found! Perhaps the page returned is a CAPTCHA? Check products.last_html_page')
+            return {}
 
-            selector = 0
-            for css_selector_dict in _CSS_SELECTOR_LIST:
-                selector += 1
-                css_selector = css_selector_dict.get("product", "")
-                products = soup.select(css_selector)
-                if len(products) >= 1:
-                    break
+        soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
-            # For each product of the result page
-            for product in products:
-                if len(self.product_dict_list) >= max_product_nb:
-                    # Check if the maximum number to search has been reached
-                    break
-                else:
-                    product_dict = {}
-                    title = _css_select(product,
-                                        css_selector_dict.get("title", ""))
-                    product_dict['title'] = title
-                    rating = _css_select(product,
-                                         css_selector_dict.get("rating", ""))
-                    review_nb = _css_select(product,
-                                            css_selector_dict.get(
-                                                "review_nb", ""))
-                    if rating != "":
-                        proper_rating = rating.split(" ")[0].strip()
-                        # In French results, ratings with comma
-                        # Replace it with a dot (3,5 => 3.5)
-                        proper_rating = proper_rating.replace(",", ".")
-                        product_dict['rating'] = proper_rating
-                    if review_nb != "":
-                        proper_review_nb = review_nb
-                        if len(review_nb.split("(")) > 1:
-                            proper_review_nb = review_nb.split("(")[1].\
-                                            split(")")[0]
+        # shuffle through CSS selectors until we get a list of products
+        selector = 0
+        for css_selector_dict in _CSS_SELECTOR_LIST:
+            selector += 1
+            css_selector = css_selector_dict.get("product", "")
+            products = soup.select(css_selector)
+            if len(products) >= 1:
+                break
 
-                        # Remove the comma for thousands (2,921 => 2921)
-                        proper_review_nb = proper_review_nb.replace(",", "")
-                        product_dict['review_nb'] = proper_review_nb
+        # For each product of the result page
+        for product in products:
 
-                    # Get image before url and asin
-                    css_selector = css_selector_dict.get("img", "")
-                    img_product_soup = product.select(css_selector)
-                    if img_product_soup:
-                        img_url = img_product_soup[0].get('src')
-                        # Check if it is not a base64 formatted image
-                        if "data:image/webp" in img_url:
-                            img_url = img_product_soup[0].get(
-                                'data-search-image-source-set',
-                                '').split(' ')[0]
+            # Check if the maximum number to search has been reached
+            if len(self.product_dict_list) >= max_product_nb:
+                break
 
-                        if img_url != '':
-                            img_url = _get_high_res_img_url(img_url=img_url)
+            product_dict = {}
 
-                        product_dict['img'] = img_url
+            # extract title
+            product_dict['title'] = self._get_title(product)
 
-                    css_selector = css_selector_dict.get("url", "")
-                    url_product_soup = product.select(css_selector)
-                    if url_product_soup:
-                        url = urljoin(
-                            self.base_url,
-                            url_product_soup[0].get('href'))
-                        proper_url = url.split("/ref=")[0]
-                        product_dict['url'] = proper_url
+            print('Extracting {}'.format(product_dict['title']))
 
-                        url_token = proper_url.split("/")
-                        asin = url_token[len(url_token)-1]
-                        product_dict['asin'] = asin
+            # extract rating
+            product_dict['rating'] = self._get_rating(product)
 
-                        if "slredirect" not in proper_url:  # slredirect = bad url
-                            # Get price using asin
-                            info_url = urljoin(
-                                self.base_url,
-                                f"gp/cart/desktop/ajax-mini-detail.html/ref=added_item_1?ie=UTF8&asin={asin}")
-                            info = self._get(info_url)
-                            soup_info = BeautifulSoup(info.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
-                            price = soup_info.select('span.a-size-medium.a-color-price.sc-price')
-                            if price: # Doesn't work for ebooks
-                                product_dict['price'] = price[0].getText()
+            # extract number of ratings
+            product_dict['review_nb'] = self._get_n_ratings(product)
 
-                            self.product_dict_list.append(product_dict)
+            # Get image before url and asin
+            css_selector = css_selector_dict.get("img", "")
+            img_product_soup = product.select(css_selector)
+            if img_product_soup:
+                img_url = img_product_soup[0].get('src')
+                # Check if it is not a base64 formatted image
+                if "data:image/webp" in img_url:
+                    img_url = img_product_soup[0].get(
+                        'data-search-image-source-set',
+                        '').split(' ')[0]
 
-            if len(self.product_dict_list) < max_product_nb:
-                # Check if there is another page
-                # only if we have not already reached the max number of products
-                css_selector = css_selector_dict.get("next_page_url", "")
-                url_next_page_soup = soup.select(css_selector)
-                if url_next_page_soup:
-                    url_next_page = urljoin(
+                if img_url != '':
+                    img_url = _get_high_res_img_url(img_url=img_url)
+
+                product_dict['img'] = img_url
+
+
+            # Extract ASIN, product URL and price
+            css_selector = css_selector_dict.get("url", "")
+
+            url_product_soup = product.select(css_selector)
+
+            if url_product_soup:
+                url = urljoin(
+                    self.base_url,
+                    url_product_soup[0].get('href'))
+                proper_url = url.split("/ref=")[0]
+                product_dict['url'] = proper_url
+
+                url_token = proper_url.split("/")
+                asin = url_token[len(url_token)-1]
+                product_dict['asin'] = asin
+
+                if "slredirect" not in proper_url:  # slredirect = bad url
+                    # Get price using asin
+                    info_url = urljoin(
                         self.base_url,
-                        url_next_page_soup[0].get('href'))
-                    self._get_products(search_url=url_next_page,
-                                    max_product_nb=max_product_nb)
+                        f"gp/cart/desktop/ajax-mini-detail.html/ref=added_item_1?ie=UTF8&asin={asin}")
+                    info = self._get(info_url)
+                    soup_info = BeautifulSoup(info.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
+                    price = soup_info.select('span.a-size-medium.a-color-price.sc-price')
+                    if price: # Doesn't work for ebooks
+                        product_dict['price'] = price[0].getText()
+
+            # use alternate method to extract price
+            if 'price' not in product_dict:
+                product_dict['price'] = self._get_price(product)
+
+            self.product_dict_list.append(product_dict)
+        # end for loop
+
+
+        if len(self.product_dict_list) < max_product_nb:
+            # Check if there is another page
+            # only if we have not already reached the max number of products
+            css_selector = css_selector_dict.get("next_page_url", "")
+            url_next_page_soup = soup.select(css_selector)
+            if url_next_page_soup:
+                url_next_page = urljoin(
+                    self.base_url,
+                    url_next_page_soup[0].get('href'))
+                self._get_products(search_url=url_next_page,
+                                max_product_nb=max_product_nb)
+        # end if
+
 
         return self.product_dict_list
 
 
 def _css_select(soup, css_selector):
-    """ Returns the content of the element pointed by the CSS selector,
-    or an empty string if not found """
+    """
+    Returns the content of the element pointed by the CSS selector, or an empty string if not
+    found
+    """
     selection = soup.select(css_selector)
     retour = ""
     if len(selection) > 0:
