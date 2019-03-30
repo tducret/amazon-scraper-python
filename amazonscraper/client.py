@@ -20,7 +20,6 @@ Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) \
 Chrome/67.0.3396.79 Safari/537.36'
 
 _USER_AGENT_LIST = [
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0',
     _DEFAULT_USER_AGENT,
     _CHROME_DESKTOP_USER_AGENT,
 ]
