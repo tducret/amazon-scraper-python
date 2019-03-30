@@ -3,7 +3,9 @@
 useful information (title, ratings, number of reviews).
 """
 from builtins import object
+import csv
 from amazonscraper.client import Client
+
 
 __version__ = '0.1.2'  # Should be the same in setup.py
 
@@ -13,6 +15,7 @@ class Products(object):
     def __init__(self, product_dict_list=[]):
         self.products = []
         self.last_html_page = ""  # HTML content of the last scraped page
+        self.html_pages = []
         for product_dict in product_dict_list:
             self._add_product(product_dict)
 
@@ -42,7 +45,7 @@ class Products(object):
         (ex : products[1]) """
         return self.products[key]
 
-    def csv(self, separator=","):
+    def csv(self, file_name, separator=","):
         """ Returns a CSV string with the product info
         >>> p = Products([{'title':'Book title', 'rating': '4.2',\
 'review_nb': '15', 'url':'http://www.amazon.com/book', 'asin':'A12345'}])
@@ -58,27 +61,18 @@ Product URL,Image URL,ASIN\\n"Book title",4.2,15,http://www.amazon.com/book,,A12
         >>> p2.csv()
         'Product title,Rating,Number of customer reviews,Product URL,Image URL,ASIN'
         """
-        csv_string = separator.join([
-                                    "Product title",
-                                    "Rating",
-                                    "Number of customer reviews",
-                                    "Product URL",
-                                    "Image URL",
-                                    "ASIN"])
-        for product in self:
-            rating = product.rating
-            if separator == ";":  # French convention
-                rating = rating.replace(".", ",")
-            csv_string += ("\n"+separator.join([
-                                        # Add the doublequotes " for titles
-                                        '"'+product.title+'"',
-                                        rating,
-                                        product.review_nb,
-                                        product.url,
-                                        product.img,
-                                        product.asin]))
-        return csv_string
 
+        if not self.products:
+            return
+
+        with open(file_name, 'w') as csvfile:
+            writer = csv.writer(csvfile, delimiter=separator)
+
+            header = list(self.products[0].product.keys())
+            writer.writerow(header)
+
+            for product in self.products:
+                writer.writerow(list(product.product.values()))
 
 class Product(object):
     """Class of a product"""
@@ -99,6 +93,7 @@ def search(keywords="", search_url="", max_product_nb=100):
         search_url=search_url,
         max_product_nb=max_product_nb)
     products = Products(product_dict_list)
-    products.last_html_page = amz.last_html_page
+    products.html_pages = amz.html_pages
+    products.last_html_page = amz.html_pages[-1]
 
     return products

@@ -93,6 +93,7 @@ class Client(object):
                         application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                     }
         self.product_dict_list = []
+        self.html_pages = []
 
     def _change_user_agent(self):
         """ Change the User agent of the requests
@@ -253,10 +254,11 @@ class Client(object):
         res = None
 
         while trials < _MAX_TRIAL_REQUESTS:
+            print('Trying user agent: {}'.format(self.headers['User-Agent']))
             trials += 1
             try:
                 res = self._get(search_url)
-                # import pdb; pdb.set_trace()
+
                 valid_page = self._check_page(res.text)
 
             # To counter the "SSLError bad handshake" exception
@@ -272,10 +274,7 @@ class Client(object):
             self._change_user_agent()
             time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
 
-        if res is not None:
-            self.last_html_page = res.text
-        else:
-            self.last_html_page = "Not any good page saved :("
+        self.html_pages.append(res.text)
 
         if not valid_page:
             print('No valid pages found! Perhaps the page returned is a CAPTCHA? Check products.last_html_page')
