@@ -225,41 +225,64 @@ class Client(object):
         return rating
 
 
-    def _get_price(self, product):
-        """Given the HTML for a particular `product`, extract the price"""
+    def _get_prices(self, product):
+        """
+        Given the HTML for a particular `product`, extract all prices.
+        """
 
-        # match prices of the form $X,XXX.XX.
-        # Note the '<' at the end that distinguishes between list prices and per unit prices
-        # By using the minimum non-zero price, strikethrough prices are ignored
-        prices = re.findall(r'\$([\d,]*.\d\d)<', str(product))
+        # match all prices of the form $X,XXX.XX:
+        raw_prices = product.find_all(text=re.compile('\$[\d,]+.\d\d'))
 
-        # convert strings to floats and sort
-        prices = list(sorted(map(float, prices)))
+        prices = {
+            'prices_per_unit': [float('nan')],
+            'units': [None],
+            'prices_main': [float('nan')],
+            'prices_more_buying_choices': [float('nan')],
+        }
 
-        # sometimes a promotional price of zero dolars is returned
-        try:
-            prices.remove(0.0)
-        except ValueError:
-            pass
+        # attempt to identify the prices
+        for raw_price in raw_prices:
 
-        if not prices:
-            print(f'  Failed to extract price!')
+            # get the price as a float rather than a string or BeautifulSoup object
+            price = float(re.search('\$([\d,]+.\d\d)', raw_price).groups()[0])
 
-        return min(prices)
+            # extract "More Buying Choices" price
+            # import pdb; pdb.set_trace()
 
+            # ignore strikethrough prices used for advertising
+            if raw_price.parent.parent.attrs.get('data-a-strike') == 'true':
+                print('  Price {} discarded as promotional.'.format(raw_price))
+                continue
 
-    def _get_unit_price(self, product):
-        """Given the HTML for a particular `product`, extact the price per unit and the unit"""
+            # ignore promotional freebies
+            elif raw_price == '$0.00':
+                print('  Price {} discarded as promotional'.format(raw_price))
+                continue
 
-        unit_prices = re.findall(r'\(\$([\d,]*.\d\d)/(.*)?\)', str(product))
+            # extract price per unit price and unit
+            elif raw_price.startswith('(') and '/' in raw_price:
+                price_per_unit = re.findall(r'/(.*)\)', raw_price)[0]
+                prices['prices_per_unit'].append(price)
+                prices['units'].append(price_per_unit)
 
-        if len(unit_prices) == 0:
-            return float('nan'), None
+            # extract price for More Buying Choices
+            elif raw_price.previous.previous.previous == "More Buying Choices":
+                prices['prices_more_buying_choices'].append(price)
 
-        if len(unit_prices) > 1:
-            print('Taking the first unit price found {}'.format(unit_prices))
+            # any other price if hopefully the main price
+            else:
+                prices['prices_main'].append(price)
 
-        return float(unit_prices[0][0]), unit_prices[0][1]
+        # return just one value for each price, the most recent found
+        for price_type, price_values in prices.copy().items():
+
+            if len(price_values) > 2:
+                print('  Encountered multiple {} and using the last of {}'.format(price_type, price_values))
+
+            # take the last value. If no value of was added, this will be NaN or None
+            prices[price_type] = price_values[-1]
+
+        return prices
 
 
     def _get_products(self, keywords="", search_url="", max_product_nb=100):
@@ -321,16 +344,13 @@ class Client(object):
             # extract title
             product_dict['title'] = self._get_title(product)
 
-            print('Extracting {}'.format(product_dict['title']))
+            print('Extracting {}'.format(product_dict['title'][:80]))
 
             # extract rating
             product_dict['rating'] = self._get_rating(product)
 
             # extract number of ratings
             product_dict['review_nb'] = self._get_n_ratings(product)
-
-            # extract unit price
-            product_dict['unit_price'], product_dict['unit'] =  self._get_unit_price(product)
 
             # Get image before url and asin
             css_selector = css_selector_dict.get("img", "")
@@ -376,17 +396,16 @@ class Client(object):
                     if price: # Doesn't work for ebooks
                         product_dict['price'] = price[0].getText()
 
-            # use alternate method to extract price
-            if 'price' not in product_dict:
-                product_dict['price'] = self._get_price(product)
+            # Amazon has many prices associated with a given product
+            prices = self._get_prices(product)
+            product_dict.update(prices)
 
             self.product_dict_list.append(product_dict)
         # end for loop
 
-
+        # get more products if we haven't reached the limit
         if len(self.product_dict_list) < max_product_nb:
-            # Check if there is another page
-            # only if we have not already reached the max number of products
+
             css_selector = css_selector_dict.get("next_page_url", "")
             url_next_page_soup = soup.select(css_selector)
             if url_next_page_soup:
