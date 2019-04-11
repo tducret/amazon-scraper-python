@@ -149,7 +149,7 @@ class Client(object):
         return search_url
 
     def _check_page(self, html_content):
-        """ Check if the page is a valid result page
+        """Check if the page is a valid result page
         (even if there is no result) """
         if "Sign in for the best experience" in html_content:
             valid_page = False
@@ -161,6 +161,37 @@ class Client(object):
             valid_page = True
         return valid_page
 
+
+    def _get_page_html(self, search_url):
+        """Retrieve the page at `search_url`"""
+        trials = 0
+        res = None
+
+        while trials < _MAX_TRIAL_REQUESTS:
+
+            print('Trying user agent: {}'.format(self.headers['User-Agent']))
+            trials += 1
+            try:
+                res = self._get(search_url)
+
+                valid_page = self._check_page(res.text)
+
+            # To counter the "SSLError bad handshake" exception
+            except requests.exceptions.SSLError:
+                valid_page = False
+
+            except ConnectionError:
+                valid_page = False
+
+            if valid_page:
+                break
+
+            self._change_user_agent()
+            time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
+
+        if not valid_page:
+            raise ValueError('No valid pages found! Perhaps the page returned is a CAPTCHA? Check products.last_html_page')
+        return res.text
 
     def _get_n_ratings(self, product):
         """Given the HTML for a particular `product`, extract the number of ratings"""
@@ -284,44 +315,10 @@ class Client(object):
 
         return prices
 
+    def _extract_page(self, page, max_product_nb):
+        """Extract the products on a given HTML page"""
 
-    def _get_products(self, keywords="", search_url="", max_product_nb=100):
-
-        if search_url == "":
-            search_url = self._get_search_url(keywords)
-        self._update_headers(search_url)
-
-        trials = 0
-        res = None
-
-        while trials < _MAX_TRIAL_REQUESTS:
-            print('Trying user agent: {}'.format(self.headers['User-Agent']))
-            trials += 1
-            try:
-                res = self._get(search_url)
-
-                valid_page = self._check_page(res.text)
-
-            # To counter the "SSLError bad handshake" exception
-            except requests.exceptions.SSLError:
-                valid_page = False
-
-            except ConnectionError:
-                valid_page = False
-
-            if valid_page:
-                break
-
-            self._change_user_agent()
-            time.sleep(_WAIT_TIME_BETWEEN_REQUESTS)
-
-        self.html_pages.append(res.text)
-
-        if not valid_page:
-            print('No valid pages found! Perhaps the page returned is a CAPTCHA? Check products.last_html_page')
-            return {}
-
-        soup = BeautifulSoup(res.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
+        soup = BeautifulSoup(page, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
         # shuffle through CSS selectors until we get a list of products
         selector = 0
@@ -401,7 +398,20 @@ class Client(object):
             product_dict.update(prices)
 
             self.product_dict_list.append(product_dict)
-        # end for loop
+
+
+    def _get_products(self, keywords="", search_url="", max_product_nb=100):
+
+        if search_url == "":
+            search_url = self._get_search_url(keywords)
+        self._update_headers(search_url)
+
+        # get the html of the specified page
+        page = self._get_page_html(search_url)
+        self.html_pages.append(page)
+
+        # extract the needed products from the page
+        self._extract_page(page, max_product_nb=max_product_nb)
 
         # get more products if we haven't reached the limit
         if len(self.product_dict_list) < max_product_nb:
@@ -414,8 +424,6 @@ class Client(object):
                     url_next_page_soup[0].get('href'))
                 self._get_products(search_url=url_next_page,
                                 max_product_nb=max_product_nb)
-        # end if
-
 
         return self.product_dict_list
 
