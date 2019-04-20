@@ -61,7 +61,7 @@ _CSS_SELECTORS_DESKTOP_2 = {
     "title": "div div.sg-row  h5 > span",
     "rating": "div div.sg-row .a-spacing-top-mini i span",
     "review_nb": "div div.sg-row .a-spacing-top-mini span.a-size-small",
-    "url": "div div.sg-col-8-of-12 a.a-link-normal",
+    "url": "div div a.a-link-normal",
     "img": "img[src]",
     "next_page_url": "li.a-last > a[href]",
 }
@@ -214,6 +214,7 @@ class Client(object):
 
         if not n_ratings:
             print(f'  Failed to extract number of ratings!')
+            return float('nan')
 
         return n_ratings
 
@@ -265,10 +266,9 @@ class Client(object):
         raw_prices = product.find_all(text=re.compile('\$[\d,]+.\d\d'))
 
         prices = {
-            'prices_per_unit': [float('nan')],
-            'units': [None],
-            'prices_main': [float('nan')],
-            'prices_more_buying_choices': [float('nan')],
+            'prices_per_unit': set(),
+            'units': set(),
+            'prices_main': set(),
         }
 
         # attempt to identify the prices
@@ -277,41 +277,36 @@ class Client(object):
             # get the price as a float rather than a string or BeautifulSoup object
             price = float(re.search('\$([\d,]+.\d\d)', raw_price).groups()[0])
 
-            # extract "More Buying Choices" price
-            # import pdb; pdb.set_trace()
-
-            # ignore strikethrough prices used for advertising
+            # ignore promotional strikethrough prices
             if raw_price.parent.parent.attrs.get('data-a-strike') == 'true':
-                print('  Price {} discarded as promotional.'.format(raw_price))
                 continue
 
             # ignore promotional freebies
             elif raw_price == '$0.00':
-                print('  Price {} discarded as promotional'.format(raw_price))
                 continue
 
             # extract price per unit price and unit
             elif raw_price.startswith('(') and '/' in raw_price:
                 price_per_unit = re.findall(r'/(.*)\)', raw_price)[0]
-                prices['prices_per_unit'].append(price)
-                prices['units'].append(price_per_unit)
+                prices['prices_per_unit'].add(price)
+                prices['units'].add(price_per_unit)
 
-            # extract price for More Buying Choices
-            elif raw_price.previous.previous.previous == "More Buying Choices":
-                prices['prices_more_buying_choices'].append(price)
-
-            # any other price if hopefully the main price
+            # any other price is hopefully the main price
             else:
-                prices['prices_main'].append(price)
+                prices['prices_main'].add(price)
 
-        # return just one value for each price, the most recent found
-        for price_type, price_values in prices.copy().items():
+        # clean up the discoverd prices
+        for price_type, price_value in prices.copy().items():
 
-            if len(price_values) > 2:
-                print('  Encountered multiple {} and using the last of {}'.format(price_type, price_values))
+            if len(price_value) == 0:
+                prices[price_type] = float('nan')
 
-            # take the last value. If no value of was added, this will be NaN or None
-            prices[price_type] = price_values[-1]
+            elif len(price_value) == 1:
+                prices[price_type] = price_value.pop()
+
+            else:
+                print('  Multiple prices found. Consider selecting a format on Amazon and using that URL!')
+                prices[price_type] = ', '.join(map(str, price_value))
 
         return prices
 
@@ -326,6 +321,7 @@ class Client(object):
             selector += 1
             css_selector = css_selector_dict.get("product", "")
             products = soup.select(css_selector)
+
             if len(products) >= 1:
                 break
 
@@ -366,7 +362,7 @@ class Client(object):
                 product_dict['img'] = img_url
 
 
-            # Extract ASIN, product URL and price
+            # Extract ASIN and product URL
             css_selector = css_selector_dict.get("url", "")
 
             url_product_soup = product.select(css_selector)
@@ -375,23 +371,20 @@ class Client(object):
                 url = urljoin(
                     self.base_url,
                     url_product_soup[0].get('href'))
-                proper_url = url.split("/ref=")[0]
-                product_dict['url'] = proper_url
 
-                url_token = proper_url.split("/")
-                asin = url_token[len(url_token)-1]
-                product_dict['asin'] = asin
+                if 'slredirect' not in url:
+                    product_dict['url'] = url.split("/ref=")[0]
 
-                if "slredirect" not in proper_url:  # slredirect = bad url
-                    # Get price using asin
-                    info_url = urljoin(
-                        self.base_url,
-                        f"gp/cart/desktop/ajax-mini-detail.html/ref=added_item_1?ie=UTF8&asin={asin}")
-                    info = self._get(info_url)
-                    soup_info = BeautifulSoup(info.text, _DEFAULT_BEAUTIFULSOUP_PARSER)
-                    price = soup_info.select('span.a-size-medium.a-color-price.sc-price')
-                    if price: # Doesn't work for ebooks
-                        product_dict['price'] = price[0].getText()
+                    url_token = product_dict['url'].split("/")
+                    asin = url_token[len(url_token)-1]
+                    product_dict['asin'] = asin
+
+                else:
+                    product_dict['url'] = ''
+                    print('  Failed to extract URL!')
+                    product_dict['asin'] = ''
+                    print('  Failed to extract ASIN!')
+
 
             # Amazon has many prices associated with a given product
             prices = self._get_prices(product)
