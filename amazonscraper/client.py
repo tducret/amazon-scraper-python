@@ -194,7 +194,7 @@ class Client(object):
         return res.text
 
     def _get_n_ratings(self, product):
-        """Given the HTML for a particular `product`, extract the number of ratings"""
+        """Given the HTML of a `product`, extract the number of ratings"""
 
         n_ratings_css_selectors = [
             "div.a-row.a-size-small span.a-size-base",
@@ -220,7 +220,7 @@ class Client(object):
 
 
     def _get_title(self, product):
-        """Given the HTML for a particular `product`, extract the title"""
+        """Given the HTML of a `product`, extract the title"""
 
         title_css_selectors = [
             'h5 span',
@@ -242,7 +242,7 @@ class Client(object):
 
 
     def _get_rating(self, product):
-        """Given the HTML for a particular `product`, extract the average rating"""
+        """Given the HTML of a `product`, extract the average rating"""
 
         rating = re.search(r'(\d.\d) out of 5', str(product))
 
@@ -259,7 +259,7 @@ class Client(object):
 
     def _get_prices(self, product):
         """
-        Given the HTML for a particular `product`, extract all prices.
+        Given the HTML of a `product`, extract all prices.
         """
 
         # match all prices of the form $X,XXX.XX:
@@ -311,7 +311,10 @@ class Client(object):
         return prices
 
     def _extract_page(self, page, max_product_nb):
-        """Extract the products on a given HTML page"""
+        """
+        Extract the products on a given HTML page of Amazon results and return
+        the URL of the next page of results
+        """
 
         soup = BeautifulSoup(page, _DEFAULT_BEAUTIFULSOUP_PARSER)
 
@@ -367,6 +370,9 @@ class Client(object):
 
             url_product_soup = product.select(css_selector)
 
+            product_dict['url'] = ''
+            product_dict['asin'] = ''
+
             if url_product_soup:
                 url = urljoin(
                     self.base_url,
@@ -375,15 +381,13 @@ class Client(object):
                 if 'slredirect' not in url:
                     product_dict['url'] = url.split("/ref=")[0]
 
-                    url_token = product_dict['url'].split("/")
-                    asin = url_token[len(url_token)-1]
-                    product_dict['asin'] = asin
+                    product_dict['asin'] = product_dict['url'].split("/")[-1]
 
-                else:
-                    product_dict['url'] = ''
-                    print('  Failed to extract URL!')
-                    product_dict['asin'] = ''
-                    print('  Failed to extract ASIN!')
+            if not product_dict['url']:
+                print('  Failed to extract URL!')
+
+            if not product_dict['asin']:
+                print('  Failed to extract ASIN!')
 
 
             # Amazon has many prices associated with a given product
@@ -393,38 +397,40 @@ class Client(object):
             self.product_dict_list.append(product_dict)
 
 
+        css_selector = css_selector_dict.get("next_page_url")
+        url_next_page_soup = soup.select(css_selector)
+        if url_next_page_soup:
+            url_next_page = urljoin(
+                self.base_url,
+                url_next_page_soup[0].get('href'))
+        else:
+            raise(ValueError('Could not find the URL of the next page of results!'))
+        return url_next_page
+
+
     def _get_products(self, keywords="", search_url="", max_product_nb=100):
 
         if search_url == "":
             search_url = self._get_search_url(keywords)
         self._update_headers(search_url)
 
-        # get the html of the specified page
-        page = self._get_page_html(search_url)
-        self.html_pages.append(page)
+        while len(self.product_dict_list) < max_product_nb:
 
-        # extract the needed products from the page
-        self._extract_page(page, max_product_nb=max_product_nb)
+            # get the html of the specified page
+            page = self._get_page_html(search_url)
+            self.html_pages.append(page)
 
-        # get more products if we haven't reached the limit
-        if len(self.product_dict_list) < max_product_nb:
-
-            css_selector = css_selector_dict.get("next_page_url", "")
-            url_next_page_soup = soup.select(css_selector)
-            if url_next_page_soup:
-                url_next_page = urljoin(
-                    self.base_url,
-                    url_next_page_soup[0].get('href'))
-                self._get_products(search_url=url_next_page,
-                                max_product_nb=max_product_nb)
+            # extract the needed products from the page and return the url of
+            # the next page
+            search_url = self._extract_page(page, max_product_nb=max_product_nb)
 
         return self.product_dict_list
 
 
 def _css_select(soup, css_selector):
     """
-    Returns the content of the element pointed by the CSS selector, or an empty string if not
-    found
+    Returns the content of the element pointed by the CSS selector, or an empty
+    string if not found
     """
     selection = soup.select(css_selector)
     retour = ""
