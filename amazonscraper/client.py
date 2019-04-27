@@ -261,6 +261,8 @@ class Client(object):
         """
         Given the HTML of a `product`, extract all prices.
         """
+        # XXX currently does not handle shipping prices or prices for the
+        # various formats of books.
 
         # match all prices of the form $X,XXX.XX:
         raw_prices = product.find_all(text=re.compile('\$[\d,]+.\d\d'))
