@@ -77,5 +77,7 @@ def test_amazonscraper_csv_header():
     products = amazonscraper.search(
                                 keywords="Python",
                                 max_product_nb=1)
-    assert "Product title,Rating,Number of customer reviews,Product URL,\
-Image URL,ASIN\n" in str(products.csv())
+    products.csv('test.csv')
+    with open('test.csv') as f:
+        csv_str = f.read()
+    assert "title,rating,review_nb,img,url,asin,prices_per_unit,units,prices_main"  in csv_str
