@@ -19,7 +19,10 @@ _SCRIPTS = ['amazon2csv.py']
 # if no command is used in the package
 
 install_reqs = parse_requirements('requirements.txt', session='hack')
-requirements = [str(ir.req) for ir in install_reqs]
+try:
+    requirements = [str(ir.req) for ir in install_reqs]
+except:
+    requirements = [str(ir.requirement) for ir in install_reqs]
 
 setup(
     name=_NOM_PACKAGE,
