@@ -6,6 +6,11 @@
 [![Docker Build Status](https://img.shields.io/docker/build/thibdct/amazon2csv.svg)](https://hub.docker.com/r/thibdct/amazon2csv/)
 ![License](https://img.shields.io/github/license/tducret/amazon-scraper-python.svg)
 
+## Sponsors
+
+| Sponsor | Description |
+| --- | --- |
+| [<img src="sponsors/rapidproxy.png" alt="RapidProxy" width="200">](https://www.rapidproxy.io/?ref=amrape) | **[RapidProxy](https://www.rapidproxy.io/?ref=amrape)** offers fast, reliable residential and ISP proxies for web scraping, automation, and large-scale data collection. With 90M+ residential IPs, smart rotation, and non-expiring traffic, it helps developers reduce blocks and scale efficiently.<br><br>• 90M+ residential IPs with smart rotation<br>• High concurrency and success rates<br>• Non-expiring traffic<br>• Pricing from $0.55/GB<br><br>🎁 **[Start Your Free Trial](https://www.rapidproxy.io/?ref=amrape) — Use code RAPID10 for 10% OFF!** |
 
 # Description
 
